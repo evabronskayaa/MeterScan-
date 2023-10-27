@@ -1,0 +1,187 @@
+basePath: /api/v1
+definitions:
+  dto.LoginForm:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      recaptcha:
+        type: string
+    required:
+    - email
+    - password
+    - recaptcha
+    type: object
+  dto.RegisterForm:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      recaptcha:
+        type: string
+    required:
+    - email
+    - password
+    - recaptcha
+    type: object
+  dto.Token:
+    properties:
+      expire:
+        example: 2006-01-02T15:04:05Z07:00
+        type: string
+      orig_iat:
+        example: 2006-01-02T15:04:05Z07:00
+        type: string
+      token:
+        type: string
+    type: object
+  dto.UserWithToken:
+    properties:
+      token:
+        $ref: '#/definitions/dto.Token'
+      user:
+        $ref: '#/definitions/schema.User'
+    type: object
+  schema.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: MeterScanPlus API
+  version: "1.0"
+paths:
+  /me:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Пользователь по токену
+      tags:
+      - sessions
+  /media/{dir}/{asset}:
+    get:
+      parameters:
+      - description: Директория
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Файл
+        in: path
+        name: asset
+        required: true
+        type: string
+      responses:
+        "200":
+          description: file
+        "404":
+          description: Not Found
+      security:
+      - JWT: []
+      summary: Достать файл
+      tags:
+      - files
+  /refresh:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Token'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Обновление токена
+      tags:
+      - sessions
+  /sessions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserWithToken'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Авторизация
+      tags:
+      - sessions
+  /users:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Пользователь
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserWithToken'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Создание нового пользователя
+      tags:
+      - users
+securityDefinitions:
+  JWT:
+    description: 'Пример: `Bearer *token*`'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

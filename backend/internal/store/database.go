@@ -1,6 +1,7 @@
 package store
 
 import (
+	"backend/internal/schema"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ func OpenConnection(username, password, host, schema string) (*gorm.DB, error) {
 }
 
 func migrate(db *gorm.DB) error {
-	return db.AutoMigrate()
+	return db.AutoMigrate(schema.User{}, schema.Prediction{})
 }
 
 func ShutdownConnection(db *gorm.DB) error {

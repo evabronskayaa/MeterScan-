@@ -4,7 +4,7 @@
     "host": "localhost:3306",
     "username": "root",
     "password": "root",
-    "database": "dev"
+    "schema": "dev"
   },
   "jwt_secret": "SECRET",
   "re_captcha_secret": "RECAPTCHA"

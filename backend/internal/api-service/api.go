@@ -1,9 +1,11 @@
-package api
+package api_service
 
 import (
-	"backend/internal/api/service"
+	"backend/internal/api-service/service"
 	"backend/internal/config"
 	"backend/internal/store"
+	"backend/internal/util"
+	"time"
 )
 
 type Service service.Service
@@ -15,9 +17,14 @@ func NewService(config config.ApiConfig) (*Service, error) {
 		return nil, err
 	}
 	s := &Service{
-		DB:     connection,
-		Router: configureRouter(),
+		DB: connection,
+		ReCaptcha: util.ReCaptcha{
+			Secret:  config.ReCaptchaSecret,
+			Timeout: time.Second * 5,
+		},
+		JWTSecret: []byte(config.JWTSecret),
 	}
+	s.Router = s.configureRouter()
 	return s, nil
 }
 
