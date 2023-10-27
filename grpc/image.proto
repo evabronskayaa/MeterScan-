@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package proto;
+
+service ImageProcessingService {rpc ProcessImage(stream ImageRequest) returns (stream ImageResponse);}
+
+message ImageRequest {bytes image = 1;}
+
+message ImageResponse {bytes image_with_contour = 1;
+  string recognition_result = 2;
+  float metric = 3;}
