@@ -6,9 +6,6 @@ from proto import image_pb2_grpc, image_pb2
 
 
 class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
-    def __init__(self, *args, **kwargs):
-        pass
-
     def ProcessImage(self, request: image_pb2.ImageRequest, context):
         image = request.image
         print(f'received {image}')
