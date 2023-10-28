@@ -85,6 +85,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/predict": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prediction"
+                ],
+                "summary": "Предсказать цифры",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Файлы",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Prediction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/refresh": {
             "get": {
                 "security": [
@@ -272,6 +323,20 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/schema.User"
+                }
+            }
+        },
+        "schema.Prediction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "meter_readings": {
+                    "type": "string"
+                },
+                "metric": {
+                    "type": "number"
                 }
             }
         },

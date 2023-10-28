@@ -44,6 +44,15 @@ definitions:
       user:
         $ref: '#/definitions/schema.User'
     type: object
+  schema.Prediction:
+    properties:
+      id:
+        type: integer
+      meter_readings:
+        type: string
+      metric:
+        type: number
+    type: object
   schema.User:
     properties:
       email:
@@ -100,6 +109,38 @@ paths:
       summary: Достать файл
       tags:
       - files
+  /predict:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Файлы
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schema.Prediction'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Предсказать цифры
+      tags:
+      - prediction
   /refresh:
     get:
       consumes:

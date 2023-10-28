@@ -18,6 +18,8 @@ type ApiConfig struct {
 	JWTSecret string `json:"jwt_secret"`
 
 	ReCaptchaSecret string `json:"re_captcha_secret"`
+
+	GRPCServer string `json:"grpc_server"`
 }
 
 func (c *ApiConfig) Load() error {

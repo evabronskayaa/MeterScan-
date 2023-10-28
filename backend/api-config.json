@@ -1,5 +1,5 @@
 {
-  "post": 8080,
+  "port": 8080,
   "database": {
     "host": "localhost:3306",
     "username": "root",
@@ -7,5 +7,6 @@
     "schema": "dev"
   },
   "jwt_secret": "SECRET",
-  "re_captcha_secret": "RECAPTCHA"
+  "re_captcha_secret": "RECAPTCHA",
+  "grpc_server": "localhost:50051"
 }

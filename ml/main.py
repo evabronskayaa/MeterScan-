@@ -6,11 +6,14 @@ from proto import image_pb2_grpc, image_pb2
 
 
 class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
-    def ProcessImage(self, request: image_pb2.ImageRequest, context):
-        image = request.image
-        print(f'received {image}')
+    def ProcessImage(self, request_iterator, context):
+        for request in request_iterator:
+            image = request.image
 
-        return image_pb2.ImageResponse(image_with_contour=image, recognition_result='123456', metric=1)
+            print(f'received {len(image)}')
+
+            yield image_pb2.ImageResponse(index=request.index, image_with_contour=image, recognition_result='123456',
+                                          metric=1)
 
 
 def serve():

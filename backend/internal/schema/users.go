@@ -18,8 +18,8 @@ type User struct {
 }
 
 type Prediction struct {
-	ID            uint `gorm:"primarykey" json:"id"`
-	UserID        uint
+	ID            uint    `gorm:"primarykey" json:"id"`
+	UserID        uint    `json:"-"`
 	MeterReadings string  `gorm:"type:varchar(20);not null" json:"meter_readings"`
 	Metric        float32 `json:"metric"`
 }

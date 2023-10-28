@@ -45,6 +45,8 @@ func (s *Service) configureRouter() *gin.Engine {
 	authorized := v1.Group("/", middlewareServer.AuthMiddleware())
 	{
 		authorized.GET("media/:dir/*asset", endpointSever.MediaHandler)
+
+		authorized.POST("/predict", endpointSever.PredictHandler)
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

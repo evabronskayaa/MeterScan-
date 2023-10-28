@@ -4,6 +4,7 @@ import (
 	"backend/internal/errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -25,7 +26,7 @@ func GetPath(path, file string) (string, error) {
 	return filepath.Join(path, file), nil
 }
 
-func UploadFile(path, fileName string, file multipart.File) (string, error) {
+func SaveFile(path, fileName string, file multipart.File) (string, error) {
 	dstPath, err := GetPath(path, fileName)
 	if err != nil {
 		return "", err
@@ -38,6 +39,20 @@ func UploadFile(path, fileName string, file multipart.File) (string, error) {
 	defer out.Close()
 
 	_, err = io.Copy(out, file)
+	if err != nil {
+		return "", ErrSaveFile
+	}
+
+	return dstPath, nil
+}
+
+func SaveData(path, fileName string, file []byte) (string, error) {
+	dstPath, err := GetPath(path, fileName)
+	if err != nil {
+		return "", err
+	}
+
+	err = os.WriteFile(dstPath, file, fs.ModePerm)
 	if err != nil {
 		return "", ErrSaveFile
 	}

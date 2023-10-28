@@ -3,8 +3,12 @@ package api_service
 import (
 	"backend/internal/api-service/service"
 	"backend/internal/config"
+	"backend/internal/proto"
 	"backend/internal/store"
 	"backend/internal/util"
+	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"time"
 )
 
@@ -16,13 +20,23 @@ func NewService(config config.ApiConfig) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	conn, err := grpc.Dial(config.GRPCServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	client := proto.NewImageProcessingServiceClient(conn)
+
 	s := &Service{
-		DB: connection,
+		Port: config.Port,
+		DB:   connection,
 		ReCaptcha: util.ReCaptcha{
 			Secret:  config.ReCaptchaSecret,
 			Timeout: time.Second * 5,
 		},
-		JWTSecret: []byte(config.JWTSecret),
+		JWTSecret:              []byte(config.JWTSecret),
+		ImageProcessingService: client,
 	}
 	s.Router = s.configureRouter()
 	return s, nil
@@ -30,8 +44,7 @@ func NewService(config config.ApiConfig) (*Service, error) {
 
 func (s *Service) Start() error {
 	go func() {
-		// TODO: сюда порт
-		if err := s.Router.Run(); err != nil {
+		if err := s.Router.Run(fmt.Sprintf(":%v", s.Port)); err != nil {
 			panic(err)
 		}
 	}()
