@@ -1,0 +1,1 @@
+swag init -g ./internal/api-service/router.go
