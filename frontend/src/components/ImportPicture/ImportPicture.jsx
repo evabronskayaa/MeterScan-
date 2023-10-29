@@ -1,10 +1,24 @@
 import React from "react";
+import "./importPicture.css";
 
-const ImportPicture = ({selectedImage, onUpload}) => {
+const ImportPicture = ({ selectedImage, onUpload }) => {
   return (
     <div>
       {!selectedImage && (
-        <img src="img/default_picture.png" alt="no pic"/>
+        <div className="container">
+          <img src="img/default_picture.png" alt="no pic" />
+          <input
+            type="file"
+            name="myImage"
+            onChange={(event) => {
+              onUpload(event.target.files[0]);
+            }}
+          />
+          <button className="button">
+            <img src="img/img-placeholder.svg" alt="" />
+            <span>загрузить фото с устройства</span>
+          </button>
+        </div>
       )}
       {selectedImage && (
         <div>
@@ -15,17 +29,8 @@ const ImportPicture = ({selectedImage, onUpload}) => {
           />
         </div>
       )}
-      <br />
-      <br />
-      <input
-        type="file"
-        name="myImage"
-        onChange={(event) => {
-          onUpload(event.target.files[0]);
-        }}
-      />
     </div>
   );
-}
+};
 
-export default ImportPicture
+export default ImportPicture;
