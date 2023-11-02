@@ -28,6 +28,10 @@ type Response struct {
 
 // Verify https://developers.google.com/recaptcha/docs/verify
 func (reCaptcha ReCaptcha) Verify(userResponse, ip string) error {
+	if ip == "::1" {
+		return nil
+	}
+
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
 

@@ -10,6 +10,10 @@ services:
     ports:
       - "3306:3306"
   api-server:
-    build: .
+    build: backend
     ports:
       - "8080:8080"
+  ml:
+    build: ml
+    ports:
+      - "50051"
