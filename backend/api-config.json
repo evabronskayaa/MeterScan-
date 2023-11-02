@@ -1,0 +1,12 @@
+{
+  "port": 8080,
+  "database": {
+    "host": "db",
+    "username": "root",
+    "password": "root",
+    "schema": "dev"
+  },
+  "jwt_secret": "SECRET",
+  "re_captcha_secret": "RECAPTCHA",
+  "grpc_server": "localhost:50051"
+}

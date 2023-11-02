@@ -1,29 +1,29 @@
-import React from "react";
+import React, {useRef} from "react";
+import './importPicture.css';
 
 const ImportPicture = ({selectedImage, onUpload}) => {
+  const fileInputRef=useRef();
+
   return (
     <div>
       {!selectedImage && (
-        <img src="img/default_picture.png" alt="no pic"/>
+        <div className="container">
+        <img className="image" src="img/default_picture.png" alt="no pic" />
+        <input
+          type="file"
+          name="myImage"
+          onChange={(event) => {
+            onUpload(event.target.files[0]);
+          }}
+          ref={fileInputRef}
+          hidden
+        />
+        <button className="button" onClick={()=>fileInputRef.current.click()}>
+          <img src="img/img-placeholder.svg" alt="" />
+          <span>загрузить фото с устройства</span>
+        </button>
+      </div>
       )}
-      {selectedImage && (
-        <div>
-          <img
-            alt="not found"
-            width={"250px"}
-            src={URL.createObjectURL(selectedImage)}
-          />
-        </div>
-      )}
-      <br />
-      <br />
-      <input
-        type="file"
-        name="myImage"
-        onChange={(event) => {
-          onUpload(event.target.files[0]);
-        }}
-      />
     </div>
   );
 }

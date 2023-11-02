@@ -1,0 +1,29 @@
+.container {
+  align-items: center;
+  position: relative;
+}
+
+.image {
+  width: inherit;
+  max-height: 500px;
+  object-fit: contain;
+  height: auto;
+}
+
+.button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  height: 47px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #000;
+  background: rgba(30, 30, 30, 0.6);
+  color: white;
+  text-transform: uppercase;
+  z-index: 100;
+}
