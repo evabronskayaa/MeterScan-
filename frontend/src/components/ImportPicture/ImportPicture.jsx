@@ -1,5 +1,5 @@
 import React, {useRef} from "react";
-import './importPicture.css';
+import './importPicture.scss';
 
 const ImportPicture = ({selectedImage, onUpload}) => {
   const fileInputRef=useRef();

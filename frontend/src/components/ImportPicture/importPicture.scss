@@ -10,6 +10,17 @@
   height: auto;
 }
 
+@media (max-width: 460px) {
+  .image {
+    max-width: 100%;
+  }
+
+  .button{
+    max-width: 60%;
+    font-size: 12px;
+  }
+}
+
 .button {
   position: absolute;
   top: 50%;

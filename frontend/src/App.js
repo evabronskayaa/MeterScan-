@@ -1,8 +1,12 @@
-import "./App.css";
+import "./App.scss";
 import ImportPicture from "./components/ImportPicture/ImportPicture";
 import { stages } from "./stages";
 import { useState } from "react";
-import {uploadImage, number}  from "./requests";
+import { uploadImage, number } from "./requests";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+import TransmissionCard from "./components/TransmissionCard/transmissionCard";
 
 function App() {
   const [stage, changeStage] = useState(stages.upload);
@@ -17,7 +21,7 @@ function App() {
   if (stage === stages.upload)
     return (
       <>
-        {/* <p className="title">MeterScan+</p> */}
+        <p className="title main-title">MeterScan+</p>
         <div className="form">
           <div className="row">
             <p className="title">Загрузка фото</p>
@@ -33,15 +37,21 @@ function App() {
             onUpload={setSelectedImage}
           />
         </div>
-        {/* {showModal && (
+        {showModal && (
           <div className="modal" onClick={() => setShowModal(false)}>
-            <ul>
+            <ul onClick={(e) => e.stopPropagation()}>
+              <img
+                src="img/close.svg"
+                alt="close"
+                onClick={() => setShowModal(false)}
+              />
+              <h3>Важно</h3>
               <li>Загружайте фото только с одним счетчиком</li>
               <li>когда фотографируете в темноте, включайте вспышку</li>
               <li>Фото должно быть не смазанным</li>
             </ul>
           </div>
-        )} */}
+        )}
       </>
     );
   else if (stage === stages.analyze)
@@ -79,7 +89,6 @@ function App() {
   else if (stage === stages.send)
     return (
       <>
-        {/* <p className="title">MeterScan+</p> */}
         <div className="form">
           <p className="title">передача показаний</p>
           <img
@@ -87,13 +96,22 @@ function App() {
             src={URL.createObjectURL(selectedImage)}
             alt="pic lost"
           />
-          <div className="numbers">
-            <p>Текущие показания счетчика</p>
-            <input className="input" type="number" value={number} />
-          </div>
-          <button className="basic-button black-button" type="submit">
-            передать показания
-          </button>
+          {typeof number === 'object' ? (
+            <>
+            <Slider className="carousel" dots arrows>
+              {number.map((item, index) => (
+                <div key={index} className="carousel-item">
+                <TransmissionCard number={item}/>
+              </div>
+              ))}
+              
+            </Slider>
+            </>
+          ) : (
+            <>
+              <TransmissionCard number={number}/>
+            </>
+          )}
         </div>
       </>
     );
