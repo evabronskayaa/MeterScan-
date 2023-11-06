@@ -4,16 +4,29 @@ package proto;
 
 option go_package = "/proto";
 
-service ImageProcessingService {rpc ProcessImage(stream ImageRequest) returns (stream ImageResponse);}
+service ImageProcessingService {
+  rpc ProcessImage(stream ImageRequest) returns (stream ImageResponse);
+}
 
 message ImageRequest {
-  uint32 index = 1;
+  uint64 index = 1;
   bytes image = 2;
 }
 
 message ImageResponse {
-  uint32 index = 1;
-  bytes image_with_contour = 2;
-  string recognition_result = 3;
-  float metric = 4;
+  uint64 index = 1;
+  repeated RecognitionResult results = 2;
+}
+
+message RecognitionResult {
+  string recognition = 1;
+  float metric = 2;
+  Scope scope = 3;
+}
+
+message Scope {
+  uint32 x1 = 1;
+  uint32 y1 = 2;
+  uint32 x2 = 3;
+  uint32 y2 = 4;
 }
