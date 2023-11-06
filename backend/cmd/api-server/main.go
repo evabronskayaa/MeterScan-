@@ -1,7 +1,7 @@
 package main
 
 import (
-	api_service "backend/internal/api-service"
+	apiservice "backend/internal/api-service"
 	"backend/internal/config"
 	"backend/internal/service"
 	"log"
@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 
-	apiService, err := api_service.NewService(apiConfig)
+	apiService, err := apiservice.NewService(apiConfig)
 	if err != nil {
 		log.Panic("Get api service: ", err)
 		return

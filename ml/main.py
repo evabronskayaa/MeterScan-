@@ -12,8 +12,11 @@ class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
 
             print(f'received {len(image)}')
 
-            yield image_pb2.ImageResponse(index=request.index, image_with_contour=image, recognition_result='123456',
-                                          metric=1)
+            yield image_pb2.ImageResponse(index=request.index, results=[
+                image_pb2.RecognitionResult(recognition="123456", metric=1.0,
+                                            scope=image_pb2.Scope(x1=1, y1=1, x2=2, y2=2)),
+                image_pb2.RecognitionResult(recognition="654321", metric=1.0,
+                                            scope=image_pb2.Scope(x1=1, y1=1, x2=2, y2=2))])
 
 
 def serve():

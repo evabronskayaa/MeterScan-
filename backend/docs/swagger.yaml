@@ -1,6 +1,60 @@
 basePath: /api/v1
 definitions:
-  dto.LoginForm:
+  backend_internal_schema.NotificationSetting:
+    properties:
+      day_of_month:
+        type: integer
+      hour:
+        type: integer
+    type: object
+  backend_internal_schema.Prediction:
+    properties:
+      image_name:
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/backend_internal_schema.PredictionInfo'
+        type: array
+    type: object
+  backend_internal_schema.PredictionInfo:
+    properties:
+      id:
+        type: integer
+      meter_readings:
+        type: string
+      metric:
+        type: number
+      scope:
+        $ref: '#/definitions/backend_internal_schema.Scope'
+      valid_meter_readings:
+        type: string
+    type: object
+  backend_internal_schema.Scope:
+    properties:
+      x1:
+        type: integer
+      x2:
+        type: integer
+      y1:
+        type: integer
+      y2:
+        type: integer
+    type: object
+  backend_internal_schema.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      settings:
+        $ref: '#/definitions/backend_internal_schema.UserSetting'
+    type: object
+  backend_internal_schema.UserSetting:
+    properties:
+      notification:
+        $ref: '#/definitions/backend_internal_schema.NotificationSetting'
+    type: object
+  backend_internal_schema_dto.LoginForm:
     properties:
       email:
         type: string
@@ -13,7 +67,7 @@ definitions:
     - password
     - recaptcha
     type: object
-  dto.RegisterForm:
+  backend_internal_schema_dto.RegisterForm:
     properties:
       email:
         type: string
@@ -26,7 +80,7 @@ definitions:
     - password
     - recaptcha
     type: object
-  dto.Token:
+  backend_internal_schema_dto.Token:
     properties:
       expire:
         example: 2006-01-02T15:04:05Z07:00
@@ -37,27 +91,54 @@ definitions:
       token:
         type: string
     type: object
-  dto.UserWithToken:
-    properties:
-      token:
-        $ref: '#/definitions/dto.Token'
-      user:
-        $ref: '#/definitions/schema.User'
-    type: object
-  schema.Prediction:
+  backend_internal_schema_dto.UpdatePredictionForm:
     properties:
       id:
         type: integer
       meter_readings:
         type: string
-      metric:
-        type: number
+    required:
+    - id
+    - meter_readings
     type: object
-  schema.User:
+  backend_internal_schema_dto.User:
     properties:
       email:
         type: string
       id:
+        type: integer
+      validated:
+        type: boolean
+    type: object
+  backend_internal_schema_dto.UserWithToken:
+    properties:
+      token:
+        $ref: '#/definitions/backend_internal_schema_dto.Token'
+      user:
+        $ref: '#/definitions/backend_internal_schema_dto.User'
+    type: object
+  paginate.Page:
+    properties:
+      error:
+        type: boolean
+      error_message:
+        type: string
+      first:
+        type: boolean
+      items: {}
+      last:
+        type: boolean
+      max_page:
+        type: integer
+      page:
+        type: integer
+      size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+      visible:
         type: integer
     type: object
 host: localhost:8080
@@ -76,7 +157,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schema.User'
+            $ref: '#/definitions/backend_internal_schema.User'
         "401":
           description: Unauthorized
           schema:
@@ -109,7 +190,46 @@ paths:
       summary: Достать файл
       tags:
       - files
-  /predict:
+  /predictions:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: filter
+        type: string
+      - in: query
+        name: order
+        type: string
+      - in: query
+        name: page
+        type: string
+      - in: query
+        name: size
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paginate.Page'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Достать показания пользователя
+      tags:
+      - predictions
     post:
       consumes:
       - multipart/form-data
@@ -126,7 +246,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/schema.Prediction'
+              $ref: '#/definitions/backend_internal_schema.Prediction'
             type: array
         "400":
           description: Bad Request
@@ -140,7 +260,35 @@ paths:
       - JWT: []
       summary: Предсказать цифры
       tags:
-      - prediction
+      - predictions
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: UpdatePredictionForm
+        in: body
+        name: prediction
+        required: true
+        schema:
+          $ref: '#/definitions/backend_internal_schema_dto.UpdatePredictionForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Подтвердить показания
+      tags:
+      - predictions
   /refresh:
     get:
       consumes:
@@ -151,7 +299,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Token'
+            $ref: '#/definitions/backend_internal_schema_dto.Token'
         "401":
           description: Unauthorized
           schema:
@@ -171,14 +319,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/dto.LoginForm'
+          $ref: '#/definitions/backend_internal_schema_dto.LoginForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.UserWithToken'
+            $ref: '#/definitions/backend_internal_schema_dto.UserWithToken'
         "400":
           description: Bad Request
           schema:
@@ -200,14 +348,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/dto.RegisterForm'
+          $ref: '#/definitions/backend_internal_schema_dto.RegisterForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.UserWithToken'
+            $ref: '#/definitions/backend_internal_schema_dto.UserWithToken'
         "400":
           description: Bad Request
           schema:
@@ -217,6 +365,55 @@ paths:
           schema:
             type: string
       summary: Создание нового пользователя
+      tags:
+      - users
+  /verify:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Подтвердить аккаунт (сообщение на почте)
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Попросить выслать новое письмо для подтверждения
       tags:
       - users
 securityDefinitions:
