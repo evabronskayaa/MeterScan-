@@ -1,15 +1,14 @@
 import os, glob
 import cv2
 import numpy as np
-import pandas as pd
 from PIL import Image
 
 import onnxruntime as ort
 
 from paddleocr import PaddleOCR
 
-
 detector_classes = ['water_meter_data']
+
 
 def detect_objects_on_image(buf):
     input, img_width, img_height = prepare_input(buf)
@@ -36,14 +35,14 @@ def prepare_input(buf):
 
 
 def run_model(input):
-    model = ort.InferenceSession("models/water_meters_detector.onnx", providers=['CPUExecutionProvider'])
+    model = ort.InferenceSession("./models/water_meters_detector.onnx", providers=['CPUExecutionProvider'])
     outputs = model.run(["output0"], {"images": input})
 
     return outputs[0]
 
 
 def iou(box1, box2):
-    return intersection(box1, box2)/union(box1, box2)
+    return intersection(box1, box2) / union(box1, box2)
 
 
 def union(box1, box2):
@@ -52,7 +51,7 @@ def union(box1, box2):
     box1_area = (box1_x2 - box1_x1) * (box1_y2 - box1_y1)
     box2_area = (box2_x2 - box2_x1) * (box2_y2 - box2_y1)
 
-    return box1_area + box2_area - intersection(box1,box2)
+    return box1_area + box2_area - intersection(box1, box2)
 
 
 def intersection(box1, box2):
@@ -77,13 +76,13 @@ def process_output(output, img_width, img_height):
 
         class_id = row[4:].argmax()
         label = detector_classes[class_id]
-        
+
         xc, yc, w, h = row[:4]
-        x1 = (xc - w/2) / 640 * img_width
-        y1 = (yc - h/2) / 640 * img_height
-        x2 = (xc + w/2) / 640 * img_width
-        y2 = (yc + h/2) / 640 * img_height
-        
+        x1 = (xc - w / 2) / 640 * img_width
+        y1 = (yc - h / 2) / 640 * img_height
+        x2 = (xc + w / 2) / 640 * img_width
+        y2 = (yc + h / 2) / 640 * img_height
+
         boxes.append([x1, y1, x2, y2, label, prob])
 
     boxes.sort(key=lambda x: x[5], reverse=True)
@@ -92,7 +91,7 @@ def process_output(output, img_width, img_height):
     while len(boxes) > 0:
         result.append(boxes[0])
         boxes = [box for box in boxes if iou(box, boxes[0]) < 0.7]
-    
+
     return result
 
 
@@ -104,16 +103,18 @@ def crop_by_contours(img, contours):
         contour = np.array([(x1, y1), (x2, y2)], dtype=np.float32)
 
         x, y, w, h = cv2.boundingRect(contour)
-        cropped = img[y-10:y+h+10, x-10:x+w+10]
+        cropped = img[y - 10:y + h + 10, x - 10:x + w + 10]
 
-        cv2.imwrite(f"crops/{i}.jpg", cropped)
+        cv2.imwrite(f"./images/{i}.jpg", cropped)
 
 
 def predict_text():
+    os.makedirs(name="./images", exist_ok=True)
+
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
 
-    crops_list = glob.glob('crops/*.jpg')
-    
+    crops_list = glob.glob('./images/*.jpg')
+
     results = []
     for crop in crops_list:
         result = ocr.ocr(crop, cls=True)
@@ -123,39 +124,41 @@ def predict_text():
 
 
 def remove_old_images():
-    folder_path = 'crops/'
+    folder_path = './images/'
     files_to_delete = os.listdir(folder_path)
-    
+
     for image in files_to_delete:
-        if image.endswith('.jpg'):
-           image_path = os.path.join(folder_path, image)
-           os.remove(image_path)
+        if image is not '.gitkeep':
+            image_path = os.path.join(folder_path, image)
+            os.remove(image_path)
 
 
-def process_ocr_result(ocr_results):
+def process_ocr_result():
     ocr_results = predict_text()
+    remove_old_images()
+
     results = []
 
     for ocr_result in ocr_results:
         if len(ocr_result[0]) > 1:
-          conf = ocr_result[0][-1][-1][-1]
-          results.append([ocr_result[0][0], conf])
+            conf = ocr_result[0][0][-1][-1]
+            result = ocr_result[0][0][-1][-2]
+            results.append([result, conf])
         else:
-          result = ocr_result[0][-1][-1][-2]
-          conf = ocr_result[0][-1][-1][-1]
-          results.append([result, conf])
-
+            result = ocr_result[0][-1][-1][-2]
+            conf = ocr_result[0][-1][-1][-1]
+            results.append([result, conf])
     return results
 
 
 def concat_all_results(contours, ocr_result):
     result = []
-    
+
     for i in range(0, len(contours), 1):
         box = np.array(contours[i][:4], dtype=np.int32).tolist()
         text = ocr_result[i][0]
         proba = ocr_result[i][1]
-        
-        result.append([box, text, proba])
+
+        result.append([text, proba, box])
 
     return result

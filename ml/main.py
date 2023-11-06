@@ -11,17 +11,21 @@ class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
         for request in request_iterator:
             image = request.image
 
-            contours = detect_objects_on_image(image)
-            ocr_result = process_ocr_result(ocr_result)
+            image_path = 'images/temp'
+            with open(image_path, 'wb') as f:
+                f.write(image)
 
-            concated_results = concat_all_results(contours, ocr_result)
+            contours = detect_objects_on_image(image_path)
+            ocr_result = process_ocr_result()
+
+            concat_results = concat_all_results(contours, ocr_result)
 
             pb2_results = []
-            for result in concated_results:
-                pb2_result = image_pb2.RecognitionResult(recognition=result[0], 
+            for result in concat_results:
+                pb2_result = image_pb2.RecognitionResult(recognition=result[0],
                                                          metric=result[1],
                                                          scope=image_pb2.Scope(
-                                                             x1=result[2][0], y1=result[2][1], 
+                                                             x1=result[2][0], y1=result[2][1],
                                                              x2=result[2][2], y2=result[2][3]))
                 pb2_results.append(pb2_result)
 
