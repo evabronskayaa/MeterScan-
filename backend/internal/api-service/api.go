@@ -1,22 +1,23 @@
 package api_service
 
 import (
+	"backend/internal/api-service/router"
 	"backend/internal/api-service/service"
 	"backend/internal/config"
+	"backend/internal/mail"
 	"backend/internal/proto"
 	"backend/internal/store"
 	"backend/internal/util"
-	"fmt"
+	"github.com/go-co-op/gocron"
+	"github.com/morkid/paginate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
 )
 
-type Service service.Service
-
-func NewService(config config.ApiConfig) (*Service, error) {
+func NewService(config config.ApiConfig) (*service.Service, error) {
 	dbConfig := config.Database
-	connection, err := store.OpenConnection(dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Schema)
+	connection, err := store.OpenConnection(dbConfig.Username, dbConfig.Password, dbConfig.Schema, dbConfig.Host, dbConfig.Port)
 	if err != nil {
 		return nil, err
 	}
@@ -26,31 +27,34 @@ func NewService(config config.ApiConfig) (*Service, error) {
 		return nil, err
 	}
 
-	client := proto.NewImageProcessingServiceClient(conn)
+	mailConfig := config.Mail
+	mailClient, err := mail.NewMailClient(mailConfig.Server, mailConfig.Port, mailConfig.Login, mailConfig.Password)
+	if err != nil {
+		return nil, err
+	}
 
-	s := &Service{
-		Port: config.Port,
-		DB:   connection,
-		ReCaptcha: util.ReCaptcha{
-			Secret:  config.ReCaptchaSecret,
-			Timeout: time.Second * 5,
-		},
+	client := proto.NewImageProcessingServiceClient(conn)
+	reCaptcha := util.ReCaptcha{
+		Secret:  config.ReCaptchaSecret,
+		Timeout: time.Second * 5,
+	}
+
+	now := time.Now()
+	nextSchedule := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+	cron := gocron.NewScheduler(now.Location()).
+		Every(1).
+		Hour().
+		StartAt(nextSchedule)
+
+	s := &service.Service{
+		DB:                     connection,
+		ReCaptcha:              reCaptcha,
 		JWTSecret:              []byte(config.JWTSecret),
 		ImageProcessingService: client,
+		MailClient:             mailClient,
+		Pagination:             paginate.New(),
+		Cron:                   cron,
 	}
-	s.Router = s.configureRouter()
+	s.Router = router.ConfigureRouter(s, config.Port)
 	return s, nil
-}
-
-func (s *Service) Start() error {
-	go func() {
-		if err := s.Router.Run(fmt.Sprintf(":%v", s.Port)); err != nil {
-			panic(err)
-		}
-	}()
-	return nil
-}
-
-func (s *Service) Shutdown() error {
-	return store.ShutdownConnection(s.DB)
 }

@@ -6,13 +6,13 @@ import (
 	"backend/internal/util"
 	errors2 "errors"
 	"gorm.io/gorm"
+	"time"
 )
 
 const (
 	ErrNotFoundUser   errors.SimpleError = "Пользователь не найден"
 	ErrDuplicateEmail errors.SimpleError = "Данная почта уже используется"
 	ErrSaveUser       errors.SimpleError = "Произошла ошибка при сохранении пользователя"
-	ErrSavePrediction errors.SimpleError = "Произошла ошибка при сохранении показаний"
 )
 
 func FindUser(db *gorm.DB, query string, args ...interface{}) (*schema.User, error) {
@@ -36,7 +36,7 @@ func CreateUser(db *gorm.DB, email, password string) (*schema.User, error) {
 	}
 	user := &schema.User{
 		Email:    email,
-		Password: hashPassword,
+		Password: string(hashPassword),
 	}
 	if db.Create(&user).Error != nil {
 		return nil, ErrSaveUser
@@ -44,14 +44,10 @@ func CreateUser(db *gorm.DB, email, password string) (*schema.User, error) {
 	return user, nil
 }
 
-func AddPrediction(db *gorm.DB, user *schema.User, meterReadings string, metric float32) (*schema.Prediction, error) {
-	prediction := &schema.Prediction{
-		UserID:        user.ID,
-		MeterReadings: meterReadings,
-		Metric:        metric,
+func VerifyUser(db *gorm.DB, user *schema.User) error {
+	if db.Model(&user).Update("verified_at", time.Now()).Error != nil {
+		return ErrSaveUser
 	}
-	if db.Create(&prediction).Error != nil {
-		return nil, ErrSavePrediction
-	}
-	return prediction, nil
+
+	return nil
 }

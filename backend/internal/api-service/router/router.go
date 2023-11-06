@@ -1,16 +1,21 @@
-package api_service
+package router
 
 import (
 	_ "backend/docs"
 	"backend/internal/api-service/endpoint"
 	"backend/internal/api-service/middleware"
+	"backend/internal/api-service/service"
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"net/http"
 	"time"
 )
 
+// ConfigureRouter
+//
 // @title 		MeterScanPlus API
 // @version		1.0
 //
@@ -21,7 +26,7 @@ import (
 // @in header
 // @name Authorization
 // @description Пример: `Bearer *token*`
-func (s *Service) configureRouter() *gin.Engine {
+func ConfigureRouter(s *service.Service, port int) *http.Server {
 	router := gin.Default()
 
 	router.RedirectTrailingSlash = true
@@ -41,15 +46,26 @@ func (s *Service) configureRouter() *gin.Engine {
 
 	middlewareServer := (middleware.Service)(*s)
 	v1.GET("/refresh", middlewareServer.RefreshToken)
+	v1.GET("/verify", endpointSever.VerifyHandler)
 
 	authorized := v1.Group("/", middlewareServer.AuthMiddleware())
 	{
-		authorized.GET("media/:dir/*asset", endpointSever.MediaHandler)
+		authorized.POST("/verify", endpointSever.RequestVerifyHandler)
 
-		authorized.POST("/predict", endpointSever.PredictHandler)
+		verified := authorized.Use(middlewareServer.VerifyMiddleware())
+		{
+			verified.GET("media/:dir/*asset", endpointSever.MediaHandler)
+
+			verified.GET("/predictions", endpointSever.GetPredictionsHandler)
+			verified.POST("/predictions", endpointSever.PredictHandler)
+			verified.PUT("/predictions", endpointSever.UpdatePredictHandler)
+		}
 	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	return router
+	return &http.Server{
+		Addr:    fmt.Sprintf(":%v", port),
+		Handler: router,
+	}
 }
