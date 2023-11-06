@@ -18,7 +18,8 @@ class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
 
             pb2_results = []
             for result in concated_results:
-                pb2_result = image_pb2.RecognitionResult(recognition=result[0], metric=result[1],
+                pb2_result = image_pb2.RecognitionResult(recognition=result[0], 
+                                                         metric=result[1],
                                                          scope=image_pb2.Scope(
                                                              x1=result[2][0], y1=result[2][1], 
                                                              x2=result[2][2], y2=result[2][3]))
