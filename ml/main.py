@@ -3,6 +3,7 @@ from concurrent import futures
 import grpc
 
 from proto import image_pb2_grpc, image_pb2
+from text_detection import detect_objects_on_image, process_ocr_result, concat_all_results
 
 
 class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
@@ -10,13 +11,21 @@ class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
         for request in request_iterator:
             image = request.image
 
-            print(f'received {len(image)}')
+            contours = detect_objects_on_image(image)
+            ocr_result = process_ocr_result(ocr_result)
 
-            yield image_pb2.ImageResponse(index=request.index, results=[
-                image_pb2.RecognitionResult(recognition="123456", metric=1.0,
-                                            scope=image_pb2.Scope(x1=1, y1=1, x2=2, y2=2)),
-                image_pb2.RecognitionResult(recognition="654321", metric=1.0,
-                                            scope=image_pb2.Scope(x1=1, y1=1, x2=2, y2=2))])
+            concated_results = concat_all_results(contours, ocr_result)
+
+            pb2_results = []
+            for result in concated_results:
+                pb2_result = image_pb2.RecognitionResult(recognition=result[0], 
+                                                         metric=result[1],
+                                                         scope=image_pb2.Scope(
+                                                             x1=result[2][0], y1=result[2][1], 
+                                                             x2=result[2][2], y2=result[2][3]))
+                pb2_results.append(pb2_result)
+
+            yield image_pb2.ImageResponse(index=request.index, results=pb2_results)
 
 
 def serve():
