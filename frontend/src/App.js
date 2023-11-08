@@ -57,7 +57,7 @@ function App() {
   else if (stage === stages.analyze)
     return (
       <>
-        {/* <p className="title">MeterScan+</p> */}
+        <p className="title main-title">MeterScan+</p>
         <div className="form">
           <p className="title">анализ счетчиков</p>
           <img
@@ -89,6 +89,7 @@ function App() {
   else if (stage === stages.send)
     return (
       <>
+        <p className="title main-title">MeterScan+</p>
         <div className="form">
           <p className="title">передача показаний</p>
           <img
@@ -98,7 +99,7 @@ function App() {
           />
           {typeof number === 'object' ? (
             <>
-            <Slider className="carousel" dots arrows>
+            <Slider className="carousel" dots accessibility={false}>
               {number.map((item, index) => (
                 <div key={index} className="carousel-item">
                 <TransmissionCard number={item}/>
