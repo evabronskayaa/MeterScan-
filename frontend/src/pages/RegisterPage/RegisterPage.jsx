@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AuthService from "../../services/auth.service";
 import LoginPage from "../LoginPage/LoginPage";
+import "../../styles/form.scss";
 import { isEmail } from "validator";
 
 const required = (value) => {
@@ -65,13 +66,14 @@ const RegisterPage = (props) => {
 
   return (
     <div className="col-md-12">
+      <p className="center">MeterScan+</p>
       <div className="card card-container">
-        <p>Регистрация</p>
+        <p className="center">Регистрация</p>
         <form onSubmit={handleRegister}>
           {!successful && (
             <div>
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">Почта</label>
                 <input
                   type="text"
                   className="form-control"
@@ -83,7 +85,7 @@ const RegisterPage = (props) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">Пароль</label>
                 <input
                   type="password"
                   className="form-control"
@@ -95,15 +97,18 @@ const RegisterPage = (props) => {
               </div>
 
               <div className="form-group">
-                <button className="btn btn-primary btn-block">Sign Up</button>
+                <button className="btn btn-dark btn-block">
+                  <span>Зарегистрироваться</span>
+                </button>
               </div>
 
               <p
+                className="center no-acc"
                 onClick={() =>
                   props.redirect(<LoginPage redirect={props.redirect} />)
                 }
               >
-                Уже зарегистрирован
+                Уже есть аккаунт
               </p>
             </div>
           )}

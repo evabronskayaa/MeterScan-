@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AuthService from "../../services/auth.service";
-import RegisterPage from "../RegisterPage/RegisterPage";
+import "../../styles/form.scss";
 
 const LoginPage = (props) => {
   const [email, setEmail] = useState("");
@@ -47,12 +47,13 @@ const LoginPage = (props) => {
   };
 
   return (
-    <div className="col-md-12">
+    <div className="col-md-12 container">
+      <p className="center">MeterScan+</p>
       <div className="card card-container">
-        <p>Логин</p>
+        <p className="center">Логин</p>
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Почта</label>
             <input
               type="text"
               className="form-control"
@@ -64,7 +65,7 @@ const LoginPage = (props) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Пароль</label>
             <input
               type="password"
               className="form-control"
@@ -76,11 +77,11 @@ const LoginPage = (props) => {
           </div>
 
           <div className="form-group">
-            <button className="btn btn-primary btn-block" disabled={loading}>
+            <button className="btn btn-dark btn-block" disabled={loading}>
               {loading && (
                 <span className="spinner-border spinner-border-sm"></span>
               )}
-              <span>Login</span>
+              <span>Войти</span>
             </button>
           </div>
 
@@ -93,12 +94,12 @@ const LoginPage = (props) => {
           )}
 
           <input type="checkbox" style={{ display: "none" }} />
-          <p
+          <p className="no-acc center"
           onClick={() =>
             props.redirect("register")
           }
         >
-          Нет регистрации
+          еще нет аккаунта?
         </p>
         </form>
       </div>
