@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import "../../styles/form.scss";
 
@@ -94,13 +95,15 @@ const LoginPage = (props) => {
           )}
 
           <input type="checkbox" style={{ display: "none" }} />
+          
+          <Link to="/register">
           <p className="no-acc center"
           onClick={() =>
             props.redirect("register")
           }
         >
           еще нет аккаунта?
-        </p>
+        </p></Link>
         </form>
       </div>
         

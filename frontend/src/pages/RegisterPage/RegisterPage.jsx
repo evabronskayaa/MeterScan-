@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AuthService from "../../services/auth.service";
 import LoginPage from "../LoginPage/LoginPage";
+import { Link } from "react-router-dom";
 import "../../styles/form.scss";
 import { isEmail } from "validator";
 
@@ -101,7 +102,7 @@ const RegisterPage = (props) => {
                   <span>Зарегистрироваться</span>
                 </button>
               </div>
-
+              <Link to="/login">
               <p
                 className="center no-acc"
                 onClick={() =>
@@ -109,7 +110,7 @@ const RegisterPage = (props) => {
                 }
               >
                 Уже есть аккаунт
-              </p>
+              </p></Link>
             </div>
           )}
 
