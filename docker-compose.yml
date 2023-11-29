@@ -16,6 +16,36 @@ services:
     build: backend
     ports:
       - "8080:8080"
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbituser
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  consumer:
+    build:
+      context: .
+      dockerfile: ./consumer/Dockerfile
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+       - rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbituser
+      RABBITMQ_DEFAULT_PASS: password
+  
   ml:
     build: ml
     ports:

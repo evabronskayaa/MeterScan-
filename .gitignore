@@ -8,3 +8,9 @@
 *.njsproj
 *.sln
 *.sw?
+
+# Virtual env
+venv/
+
+#Models
+models/
