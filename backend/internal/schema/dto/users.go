@@ -1,21 +1,9 @@
 package dto
 
-import "backend/internal/schema"
-
-type LoginForm struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	ReCaptchaForm
-}
-
-type RegisterForm struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	ReCaptchaForm
-}
-
-type ReCaptchaForm struct {
-	Recaptcha string `json:"recaptcha" binding:"required"`
+type User struct {
+	ID        uint   `json:"id"`
+	Email     string `json:"email"`
+	Validated bool   `json:"validated"`
 }
 
 type Token struct {
@@ -25,6 +13,6 @@ type Token struct {
 }
 
 type UserWithToken struct {
-	User  *schema.User `json:"user"`
-	Token *Token       `json:"token"`
+	User  User   `json:"user"`
+	Token *Token `json:"token"`
 }

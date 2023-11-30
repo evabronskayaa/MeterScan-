@@ -8,11 +8,9 @@ class MLService {
   static async predict(image) {
     let form = new FormData();
     form.append("files", image);
-    this.value = await axios.post(API_URL + "predict", form, {
-      headers: {
-        Authorization: authHeader(), 
-      },
-    });
+    console.log((await axios.post(API_URL + "predictions", form, {
+      headers: authHeader(),
+    })).data);
   }
 }
 

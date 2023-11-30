@@ -2,7 +2,6 @@ package schema
 
 import (
 	"backend/internal/mail"
-	"backend/internal/schema/dto"
 	"database/sql"
 	"gorm.io/gorm"
 	"time"
@@ -43,12 +42,4 @@ func (u *User) SendMessageToMail(client *mail.Client, subject, file string, data
 
 func (u *User) RequestVerification(client *mail.Client, token string) error {
 	return u.SendMessageToMail(client, "Подтвердите почту", "request_verification.gohtml", token)
-}
-
-func (u *User) DTO() dto.User {
-	return dto.User{
-		ID:        u.ID,
-		Email:     u.Email,
-		Validated: u.VerifiedAt.Valid,
-	}
 }

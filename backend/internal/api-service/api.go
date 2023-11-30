@@ -8,6 +8,7 @@ import (
 	"backend/internal/proto"
 	"backend/internal/store"
 	"backend/internal/util"
+	"context"
 	"github.com/go-co-op/gocron"
 	"github.com/morkid/paginate"
 	"google.golang.org/grpc"
@@ -22,7 +23,8 @@ func NewService(config config.ApiConfig) (*service.Service, error) {
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(config.GRPCServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	conn, err := grpc.DialContext(ctx, config.GRPCServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
