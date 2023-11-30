@@ -88,11 +88,19 @@ button {
   border: 1px solid #000;
   background: #000;
   color: white;
+
+  &:hover{
+    background-color: #1e1e1e;
+  }
 }
 
 .white-button {
   border: 1px solid #000;
   background: #fff;
+
+  &:hover{
+    background-color: #d1d1d1;
+  }
 }
 
 .modal {
@@ -139,5 +147,18 @@ ul {
 @media (max-width: 480px) {
   .carousel {
     width: 100%;
+  }
+}
+
+div.carousel-item{
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 128px;
+  
+  button{
+    margin-top: 16px;
   }
 }

@@ -120,12 +120,18 @@ const MainPage = (props) => {
           />
           {typeof number === "object" ? (
             <>
-              <Slider className="carousel" dots accessibility={false}>
+              <Slider className="carousel border" dots accessibility={false}>
                 {number.map((item, index) => (
                   <div key={index} className="carousel-item">
                     <TransmissionCard number={item} />
                   </div>
                 ))}
+                <div className="carousel-item">
+                  <p>Если вы подтвердили все показания, то самое время</p>
+                  <button className="basic-button black-button">
+                    Передать показания
+                  </button>
+                </div>
               </Slider>
             </>
           ) : (
