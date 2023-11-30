@@ -36,7 +36,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schema.User"
+                            "$ref": "#/definitions/backend_internal_schema.User"
                         }
                     },
                     "401": {
@@ -85,7 +85,116 @@ const docTemplate = `{
                 }
             }
         },
-        "/predict": {
+        "/predictions": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "predictions"
+                ],
+                "summary": "Достать показания пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/paginate.Page"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "predictions"
+                ],
+                "summary": "Подтвердить показания",
+                "parameters": [
+                    {
+                        "description": "UpdatePredictionForm",
+                        "name": "prediction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_schema_dto.UpdatePredictionForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -99,7 +208,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "prediction"
+                    "predictions"
                 ],
                 "summary": "Предсказать цифры",
                 "parameters": [
@@ -117,7 +226,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/schema.Prediction"
+                                "$ref": "#/definitions/backend_internal_schema.Prediction"
                             }
                         }
                     },
@@ -157,7 +266,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Token"
+                            "$ref": "#/definitions/backend_internal_schema_dto.Token"
                         }
                     },
                     "401": {
@@ -188,7 +297,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginForm"
+                            "$ref": "#/definitions/backend_internal_schema_dto.LoginForm"
                         }
                     }
                 ],
@@ -196,7 +305,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserWithToken"
+                            "$ref": "#/definitions/backend_internal_schema_dto.UserWithToken"
                         }
                     },
                     "400": {
@@ -233,7 +342,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterForm"
+                            "$ref": "#/definitions/backend_internal_schema_dto.RegisterForm"
                         }
                     }
                 ],
@@ -241,7 +350,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserWithToken"
+                            "$ref": "#/definitions/backend_internal_schema_dto.UserWithToken"
                         }
                     },
                     "400": {
@@ -258,10 +367,172 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/verify": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Подтвердить аккаунт (сообщение на почте)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Попросить выслать новое письмо для подтверждения",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "dto.LoginForm": {
+        "backend_internal_schema.NotificationSetting": {
+            "type": "object",
+            "properties": {
+                "day_of_month": {
+                    "type": "integer"
+                },
+                "hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_schema.Prediction": {
+            "type": "object",
+            "properties": {
+                "image_name": {
+                    "type": "string"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_schema.PredictionInfo"
+                    }
+                }
+            }
+        },
+        "backend_internal_schema.PredictionInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "meter_readings": {
+                    "type": "string"
+                },
+                "metric": {
+                    "type": "number"
+                },
+                "scope": {
+                    "$ref": "#/definitions/backend_internal_schema.Scope"
+                },
+                "valid_meter_readings": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_schema.Scope": {
+            "type": "object",
+            "properties": {
+                "x1": {
+                    "type": "integer"
+                },
+                "x2": {
+                    "type": "integer"
+                },
+                "y1": {
+                    "type": "integer"
+                },
+                "y2": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_schema.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "settings": {
+                    "$ref": "#/definitions/backend_internal_schema.UserSetting"
+                }
+            }
+        },
+        "backend_internal_schema.UserSetting": {
+            "type": "object",
+            "properties": {
+                "notification": {
+                    "$ref": "#/definitions/backend_internal_schema.NotificationSetting"
+                }
+            }
+        },
+        "backend_internal_schema_dto.LoginForm": {
             "type": "object",
             "required": [
                 "email",
@@ -280,7 +551,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterForm": {
+        "backend_internal_schema_dto.RegisterForm": {
             "type": "object",
             "required": [
                 "email",
@@ -299,7 +570,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.Token": {
+        "backend_internal_schema_dto.Token": {
             "type": "object",
             "properties": {
                 "expire": {
@@ -315,38 +586,78 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserWithToken": {
+        "backend_internal_schema_dto.UpdatePredictionForm": {
             "type": "object",
-            "properties": {
-                "token": {
-                    "$ref": "#/definitions/dto.Token"
-                },
-                "user": {
-                    "$ref": "#/definitions/schema.User"
-                }
-            }
-        },
-        "schema.Prediction": {
-            "type": "object",
+            "required": [
+                "id",
+                "meter_readings"
+            ],
             "properties": {
                 "id": {
                     "type": "integer"
                 },
                 "meter_readings": {
                     "type": "string"
-                },
-                "metric": {
-                    "type": "number"
                 }
             }
         },
-        "schema.User": {
+        "backend_internal_schema_dto.User": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "validated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "backend_internal_schema_dto.UserWithToken": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "#/definitions/backend_internal_schema_dto.Token"
+                },
+                "user": {
+                    "$ref": "#/definitions/backend_internal_schema_dto.User"
+                }
+            }
+        },
+        "paginate.Page": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "boolean"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "first": {
+                    "type": "boolean"
+                },
+                "items": {},
+                "last": {
+                    "type": "boolean"
+                },
+                "max_page": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                },
+                "visible": {
                     "type": "integer"
                 }
             }

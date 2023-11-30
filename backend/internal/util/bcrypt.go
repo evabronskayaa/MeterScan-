@@ -7,11 +7,9 @@ import (
 const passwordHashCost = 16
 
 func HashPassword(password string) ([]byte, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), passwordHashCost)
-	return bytes, err
+	return bcrypt.GenerateFromPassword([]byte(password), passwordHashCost)
 }
 
-func CheckPasswordHash(password string, hash []byte) bool {
-	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err == nil
+func CheckPasswordHash(hash, password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

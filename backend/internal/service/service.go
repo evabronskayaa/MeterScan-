@@ -12,7 +12,7 @@ import (
 
 type Service interface {
 	Start() error
-	Shutdown() error
+	Shutdown(ctx context.Context)
 }
 
 func StartService(s Service) error {
@@ -27,9 +27,7 @@ func StartService(s Service) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := s.Shutdown(); err != nil {
-		return err
-	}
+	s.Shutdown(ctx)
 	select {
 	case <-ctx.Done():
 		log.Println("timeout of 5 seconds.")

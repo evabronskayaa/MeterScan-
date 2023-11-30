@@ -1,1 +1,1 @@
-swag init -g ./internal/api-service/router.go
+swag init -g ./internal/api-service/router/router.go -pd

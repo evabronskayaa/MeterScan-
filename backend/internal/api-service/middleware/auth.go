@@ -22,8 +22,8 @@ const (
 	ErrExpiredToken            errors.SimpleError = "Токен просрочен"
 )
 
-var (
-	signingAlgorithm = "HS256"
+const (
+	SigningAlgorithm = "HS256"
 	timeout          = time.Hour
 	authHeader       = "Authorization"
 	tokenHeadName    = "Bearer"
@@ -71,7 +71,7 @@ func parseToken(c *gin.Context, key []byte) (*jwt.Token, error) {
 	token := parts[1]
 
 	return jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod(signingAlgorithm) != t.Method {
+		if jwt.GetSigningMethod(SigningAlgorithm) != t.Method {
 			return nil, ErrInvalidSigningAlgorithm
 		}
 
@@ -133,7 +133,7 @@ func CheckIfTokenExpire(c *gin.Context, key []byte) (*jwt.Token, error) {
 }
 
 func GenerateToken(key []byte, genClaims func(claims jwt.MapClaims)) (*dto.Token, error) {
-	newToken := jwt.New(jwt.GetSigningMethod(signingAlgorithm))
+	newToken := jwt.New(jwt.GetSigningMethod(SigningAlgorithm))
 	newClaims := newToken.Claims.(jwt.MapClaims)
 
 	genClaims(newClaims)
