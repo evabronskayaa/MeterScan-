@@ -2,7 +2,7 @@ import "./transmissionCard.scss";
 import { useState } from "react";
 
 const TransmissionCard = (props) => {
-  const [value, setValue] = useState(5);
+  const [value, setValue] = useState(props.value);
   const [clicked, setClick] = useState(true);
 
   const handleChange = (e) => {

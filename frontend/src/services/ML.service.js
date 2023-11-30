@@ -8,9 +8,17 @@ class MLService {
   static async predict(image) {
     let form = new FormData();
     form.append("files", image);
-    console.log((await axios.post(API_URL + "predictions", form, {
+    const response = (await axios.post(API_URL + "predict", form, {
       headers: authHeader(),
-    })).data);
+    })).data;
+
+    const len = response[0]["results"].length;
+    if (len === 1)
+      this.value = response[0]["results"]["meter_readings"]
+    else{
+      const meterReadingsArray = response[0]["results"].map(item => item.meter_readings);
+      this.value = meterReadingsArray;
+    }
   }
 }
 

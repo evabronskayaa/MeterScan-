@@ -124,7 +124,7 @@ const MainPage = (props) => {
               <Slider className="carousel border" dots accessibility={false}>
                 {number.map((item, index) => (
                   <div key={index} className="carousel-item">
-                    <TransmissionCard number={item} />
+                    <TransmissionCard value={item} />
                   </div>
                 ))}
                 <div className="carousel-item">
@@ -137,7 +137,7 @@ const MainPage = (props) => {
             </>
           ) : (
             <>
-              <TransmissionCard number={number} />
+              <TransmissionCard value={MLService.value} />
             </>
           )}
         </div>
