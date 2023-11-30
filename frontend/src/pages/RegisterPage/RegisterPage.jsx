@@ -50,6 +50,7 @@ const RegisterPage = (props) => {
       (response) => {
         setMessage(response.data.message);
         setSuccessful(true);
+        window.location.reload();
       },
       (error) => {
         const resMessage =
