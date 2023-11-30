@@ -1,7 +1,6 @@
 import ImportPicture from "../../components/ImportPicture/ImportPicture";
 import { stages } from "../../stages";
 import { useState } from "react";
-import { number } from "../../requests";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -14,6 +13,7 @@ const MainPage = (props) => {
   const [stage, changeStage] = useState(stages.upload);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [value, setValue] = useState();
 
   const handleLogout = (e) => {
     authService.logout()
@@ -84,8 +84,10 @@ const MainPage = (props) => {
           <button
             className="basic-button black-button"
             onClick={() => {
-              changeStage(stages.send);
-              MLService.predict(selectedImage);
+              MLService.predict(selectedImage).then(r => {
+                  changeStage(stages.send);
+                  setValue(r);
+              });
             }}
           >
             отправить на анализ
@@ -119,10 +121,10 @@ const MainPage = (props) => {
             src={URL.createObjectURL(selectedImage)}
             alt="pic lost"
           />
-          {typeof MLService.value === "object" ? (
+          {typeof value === "object" ? (
             <>
               <Slider className="carousel border" dots accessibility={false}>
-                {number.map((item, index) => (
+                {value.map((item, index) => (
                   <div key={index} className="carousel-item">
                     <TransmissionCard value={item} />
                   </div>
@@ -137,7 +139,7 @@ const MainPage = (props) => {
             </>
           ) : (
             <>
-              <TransmissionCard value={MLService.value} />
+              <TransmissionCard value={value} />
             </>
           )}
         </div>
