@@ -8,7 +8,9 @@ require (
 	github.com/go-co-op/gocron v1.35.3
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/jackc/pgx/v5 v5.4.3
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/morkid/paginate v1.1.7
+	github.com/streadway/amqp v1.1.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2

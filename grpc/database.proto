@@ -1,0 +1,54 @@
+syntax = "proto3";
+package grpc.database;
+
+import "image.proto";
+
+option go_package = "/proto";
+
+service DatabaseService {
+  rpc GetUser(UserRequest) returns (UserResponse);
+  rpc CreateUser(UserRequest) returns (UserResponse);
+  rpc VerifyUser(UserRequest) returns (Empty);
+  rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse);
+  rpc UpdatePrediction(UpdatePredictionRequest) returns (Empty);
+  rpc AddPrediction(AddPredictionRequest) returns (Prediction);
+}
+
+message UserRequest {
+  optional uint64 id = 1;
+  optional string email = 2;
+  optional string password = 3;
+}
+
+message UserResponse {
+  uint64 id = 1;
+  string email = 2;
+  string password = 3;
+  bool verified = 4;
+}
+
+message GetPredictionsRequest {
+  uint64 id = 1;
+}
+
+message GetPredictionsResponse {
+  repeated Prediction predictions = 1;
+}
+
+message Prediction {
+  string image_name = 1;
+  repeated grpc.image.RecognitionResult results = 2;
+}
+
+message UpdatePredictionRequest {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string valid_meter_readings = 3;
+}
+
+message AddPredictionRequest {
+  uint64 user_id = 1;
+  repeated grpc.image.RecognitionResult results = 2;
+}
+
+message Empty {}

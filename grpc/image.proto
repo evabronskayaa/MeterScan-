@@ -1,6 +1,5 @@
 syntax = "proto3";
-
-package proto;
+package grpc.image;
 
 option go_package = "/proto";
 
@@ -22,6 +21,7 @@ message RecognitionResult {
   string recognition = 1;
   float metric = 2;
   Scope scope = 3;
+  optional uint64 id = 4;
 }
 
 message Scope {

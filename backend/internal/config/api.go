@@ -17,13 +17,6 @@ type ApiConfig struct {
 		Schema   string `json:"schema"`
 	} `json:"database"`
 
-	Mail struct {
-		Server   string `json:"server"`
-		Port     int    `json:"port"`
-		Login    string `json:"login"`
-		Password string `json:"password"`
-	} `json:"mail"`
-
 	JWTSecret string `json:"jwt_secret"`
 
 	ReCaptchaSecret string `json:"re_captcha_secret"`
