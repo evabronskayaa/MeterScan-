@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"github.com/go-co-op/gocron"
+	"github.com/minio/minio-go/v7"
 	"github.com/morkid/paginate"
 	"github.com/streadway/amqp"
 	"log"
@@ -21,6 +22,7 @@ type Service struct {
 	Cron                   *gocron.Scheduler
 	DatabaseService        proto.DatabaseServiceClient
 	RabbitMQ               *amqp.Connection
+	S3Client               *minio.Client
 }
 
 func (s *Service) Start() error {

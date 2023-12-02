@@ -16,6 +16,8 @@ const (
 	ErrSaveFile   errors.SimpleError = "Произошла ошибка при сохранении файла"
 )
 
+// GetPath
+// Deprecated
 func GetPath(path, file string) (string, error) {
 	path = fmt.Sprintf("./media/%v", path)
 	err := os.MkdirAll(path, os.ModePerm)
@@ -26,6 +28,8 @@ func GetPath(path, file string) (string, error) {
 	return filepath.Join(path, file), nil
 }
 
+// SaveFile
+// Deprecated
 func SaveFile(path, fileName string, file multipart.File) (string, error) {
 	dstPath, err := GetPath(path, fileName)
 	if err != nil {
@@ -46,6 +50,8 @@ func SaveFile(path, fileName string, file multipart.File) (string, error) {
 	return dstPath, nil
 }
 
+// SaveData
+// Deprecated
 func SaveData(path, fileName string, file []byte) (string, error) {
 	dstPath, err := GetPath(path, fileName)
 	if err != nil {

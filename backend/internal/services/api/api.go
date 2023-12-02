@@ -8,6 +8,8 @@ import (
 	"backend/internal/util"
 	"github.com/go-co-op/gocron"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/morkid/paginate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -15,12 +17,15 @@ import (
 )
 
 type Config struct {
-	Port            int    `required:"true"`
-	JWTSecret       string `required:"true"`
-	ReCaptchaSecret string `required:"true"`
-	GRPCServer      string `required:"true"`
-	DatabaseService string `required:"true"`
-	RabbitMQ        string `required:"true"`
+	Port                 int    `required:"true"`
+	JWTSecret            string `required:"true"`
+	ReCaptchaSecret      string `required:"true"`
+	GRPCServer           string `required:"true"`
+	DatabaseService      string `required:"true"`
+	RabbitMQ             string `required:"true"`
+	MinioEndpoint        string `required:"true"`
+	MinioAccessKey       string `required:"true"`
+	MinioSecretAccessKey string `required:"true"`
 }
 
 func NewService() *service.Service {
@@ -57,6 +62,15 @@ func NewService() *service.Service {
 
 	databaseClient := proto.NewDatabaseServiceClient(grpcConn)
 
+	s3Client, err := minio.New(config.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.MinioAccessKey, config.MinioSecretAccessKey, ""),
+		Secure: true,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
 	s := &service.Service{
 		ReCaptcha:              reCaptcha,
 		JWTSecret:              []byte(config.JWTSecret),
@@ -65,6 +79,7 @@ func NewService() *service.Service {
 		Cron:                   cron,
 		DatabaseService:        databaseClient,
 		RabbitMQ:               rabbitmq,
+		S3Client:               s3Client,
 	}
 	s.Router = router.ConfigureRouter(s, config.Port)
 	return s
