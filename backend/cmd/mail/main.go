@@ -42,7 +42,12 @@ func main() {
 	}
 	defer channelRabbitMQ.Close()
 
-	messages, err := channelRabbitMQ.Consume("MailServer", "", true, false, false, false, nil)
+	q, err := channelRabbitMQ.QueueDeclare("mail", true, false, false, false, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	messages, err := channelRabbitMQ.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
 		log.Println(err)
 	}
@@ -54,19 +59,19 @@ func main() {
 
 	go func() {
 		for message := range messages {
-			var m Message
+			var m mail.Message
 			if err := json.Unmarshal(message.Body, &m); err != nil {
-				log.Println(" > Error: ", err)
+				log.Println(" > Error json: ", err)
 				continue
 			}
 
 			switch m.Type {
-			case Html:
+			case mail.Html:
 				if err := mailClient.SendHtmlMessage(m.Subject, m.File, m.Data, m.To...); err != nil {
 					log.Println(" > Error: ", err)
 					continue
 				}
-			case Plain:
+			case mail.Plain:
 				if err := mailClient.SendPlainMessage(m.Subject, m.Message, m.To...); err != nil {
 					log.Println(" > Error: ", err)
 					continue
@@ -76,23 +81,4 @@ func main() {
 	}()
 
 	<-forever
-}
-
-type Type int
-
-const (
-	Html Type = iota
-	Plain
-)
-
-type Message struct {
-	Type    Type
-	Subject string
-
-	File string
-	Data any
-
-	Message string
-
-	To []string
 }

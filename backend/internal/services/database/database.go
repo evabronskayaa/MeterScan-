@@ -17,25 +17,23 @@ type Config struct {
 	GrpcPort int    `required:"true"`
 }
 
-func NewService() (*service.Service, error) {
+func NewService() *service.Service {
 	var config Config
-	if err := envconfig.Process("database", &config); err != nil {
-		return nil, err
-	}
+	envconfig.MustProcess("database", &config)
 
 	connection, err := store.OpenConnection(config.Username, config.Password, config.Schema, config.Host, config.Port)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", config.GrpcPort))
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	s := &service.Service{
 		Listener: lis,
 		DB:       connection,
 	}
-	return s, nil
+	return s
 }

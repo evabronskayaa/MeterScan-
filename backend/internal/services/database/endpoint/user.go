@@ -8,6 +8,7 @@ import (
 	"context"
 	errors2 "errors"
 	"gorm.io/gorm"
+	"time"
 )
 
 type GRPCServer struct {
@@ -47,7 +48,7 @@ func (s GRPCServer) CreateUser(_ context.Context, request *proto.UserRequest) (*
 		email := *request.Email
 		password := *request.Password
 
-		if _, err := getUser(s.DB, "email = ?", email); errors2.Is(err, errors.ErrNotFoundUser) {
+		if _, err := getUser(s.DB, "email = ?", email); !errors2.Is(err, errors.ErrNotFoundUser) {
 			return nil, errors.ErrDuplicateEmail
 		}
 
@@ -79,7 +80,11 @@ func (s GRPCServer) VerifyUser(_ context.Context, request *proto.UserRequest) (*
 			return nil, errors.ErrAlreadyVerified
 		}
 
-		return nil, nil
+		if s.DB.Model(&user).Update("verified_at", time.Now()).Error != nil {
+			return nil, errors.ErrSaveUser
+		}
+
+		return &proto.Empty{}, nil
 	}
 	return nil, errors.ErrIncorrectRequest
 }

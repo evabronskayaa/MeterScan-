@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	if s, err := database.NewService(); err != nil {
-		log.Panic("Get database service: ", err)
-	} else if err := services.StartService(s); err != nil {
+	s := database.NewService()
+
+	if err := services.StartService(s); err != nil {
 		log.Panic(err)
 	}
 }

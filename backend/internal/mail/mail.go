@@ -16,8 +16,33 @@ type Client struct {
 	login string
 }
 
+type Type int
+
+const (
+	Html Type = iota
+	Plain
+)
+
+type Message struct {
+	Type    Type   `json:"type"`
+	Subject string `json:"subject"`
+
+	File string `json:"file"`
+	Data any    `json:"data"`
+
+	Message string `json:"message"`
+
+	To []string `json:"to"`
+}
+
 func NewMailClient(server string, port int, login, password string) (*Client, error) {
-	c, err := mail.NewClient(server, mail.WithPort(port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(login), mail.WithPassword(password), mail.WithSSL())
+	c, err := mail.NewClient(server,
+		mail.WithPort(port),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain),
+		mail.WithUsername(login),
+		mail.WithPassword(password),
+		mail.WithSSL(),
+	)
 	if err != nil {
 		return nil, err
 	}

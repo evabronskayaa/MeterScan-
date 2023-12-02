@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/go-co-op/gocron"
 	"github.com/morkid/paginate"
+	"github.com/streadway/amqp"
 	"log"
 	"net/http"
 )
@@ -19,6 +20,7 @@ type Service struct {
 	Pagination             *paginate.Pagination
 	Cron                   *gocron.Scheduler
 	DatabaseService        proto.DatabaseServiceClient
+	RabbitMQ               *amqp.Connection
 }
 
 func (s *Service) Start() error {
@@ -36,6 +38,9 @@ func (s *Service) Start() error {
 }
 
 func (s *Service) Shutdown(ctx context.Context) {
+	if err := s.RabbitMQ.Close(); err != nil {
+		log.Printf("RabbitMQ shutdown with err: %v", err)
+	}
 	if err := s.Router.Shutdown(ctx); err != nil {
 		log.Printf("Web server shutdown with err: %v", err)
 	}

@@ -3,7 +3,6 @@ package rabbit
 import (
 	"encoding/json"
 	"github.com/streadway/amqp"
-	"log"
 )
 
 func ConnectRabbitMQ(url string) (*amqp.Connection, error) {
@@ -14,16 +13,16 @@ func ConnectRabbitMQ(url string) (*amqp.Connection, error) {
 	return conn, nil
 }
 
-func PublishToRabbitMQ(conn *amqp.Connection, queue string, message any) {
+func PublishToRabbitMQ(conn *amqp.Connection, queue string, message any) error {
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(queue, true, false, false, false, nil)
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	marshal, _ := json.Marshal(message)
@@ -32,7 +31,5 @@ func PublishToRabbitMQ(conn *amqp.Connection, queue string, message any) {
 		ContentType: "text/plain",
 		Body:        marshal,
 	})
-	if err != nil {
-		log.Print(err)
-	}
+	return err
 }

@@ -1,28 +1,46 @@
 package api
 
 import (
-	"backend/internal/config"
 	"backend/internal/proto"
+	"backend/internal/rabbit"
 	"backend/internal/services/api/router"
 	"backend/internal/services/api/service"
 	"backend/internal/util"
 	"github.com/go-co-op/gocron"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/morkid/paginate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
 )
 
-func NewService(config config.ApiConfig) (*service.Service, error) {
+type Config struct {
+	Port            int    `required:"true"`
+	JWTSecret       string `required:"true"`
+	ReCaptchaSecret string `required:"true"`
+	GRPCServer      string `required:"true"`
+	DatabaseService string `required:"true"`
+	RabbitMQ        string `required:"true"`
+}
+
+func NewService() *service.Service {
+	var config Config
+	envconfig.MustProcess("api", &config)
+
 	conn, err := grpc.Dial(config.GRPCServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	client := proto.NewImageProcessingServiceClient(conn)
 	reCaptcha := util.ReCaptcha{
 		Secret:  config.ReCaptchaSecret,
 		Timeout: time.Second * 5,
+	}
+
+	rabbitmq, err := rabbit.ConnectRabbitMQ(config.RabbitMQ)
+	if err != nil {
+		panic(err)
 	}
 
 	now := time.Now()
@@ -32,9 +50,9 @@ func NewService(config config.ApiConfig) (*service.Service, error) {
 		Hour().
 		StartAt(nextSchedule)
 
-	grpcConn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConn, err := grpc.Dial(config.DatabaseService, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	databaseClient := proto.NewDatabaseServiceClient(grpcConn)
@@ -46,7 +64,8 @@ func NewService(config config.ApiConfig) (*service.Service, error) {
 		Pagination:             paginate.New(),
 		Cron:                   cron,
 		DatabaseService:        databaseClient,
+		RabbitMQ:               rabbitmq,
 	}
 	s.Router = router.ConfigureRouter(s, config.Port)
-	return s, nil
+	return s
 }

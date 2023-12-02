@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"backend/internal/mail"
 	"backend/internal/proto"
 	"database/sql"
 	"gorm.io/gorm"
@@ -32,17 +31,6 @@ type UserSetting struct {
 type NotificationSetting struct {
 	DayOfMonth int `gorm:"type:int;not null" json:"day_of_month"`
 	Hour       int `gorm:"type:int;not null" json:"hour"`
-}
-
-func (u *User) SendMessageToMail(client *mail.Client, subject, file string, data any) error {
-	if !u.VerifiedAt.Valid {
-		return nil
-	}
-	return client.SendHtmlMessage(subject, file, data, u.Email)
-}
-
-func (u *User) RequestVerification(client *mail.Client, token string) error {
-	return u.SendMessageToMail(client, "Подтвердите почту", "request_verification.gohtml", token)
 }
 
 func (u *User) Proto() *proto.UserResponse {

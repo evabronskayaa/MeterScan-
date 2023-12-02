@@ -28,7 +28,7 @@ type Response struct {
 
 // Verify https://developers.google.com/recaptcha/docs/verify
 func (reCaptcha ReCaptcha) Verify(userResponse, ip string) error {
-	if ip == "::1" {
+	if ip == "::1" || reCaptcha.Secret == "secret" {
 		return nil
 	}
 

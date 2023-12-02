@@ -3,7 +3,9 @@ package endpoint
 import (
 	"backend/internal/dto"
 	"backend/internal/errors"
+	"backend/internal/mail"
 	"backend/internal/proto"
+	"backend/internal/rabbit"
 	"backend/internal/services/api/middleware"
 	"backend/internal/services/api/service"
 	"backend/internal/util"
@@ -94,7 +96,7 @@ func (s *Service) RegisterHandler(c *gin.Context) {
 	}
 
 	if user, err := s.DatabaseService.CreateUser(c, &proto.UserRequest{Email: &registerForm.Email, Password: &registerForm.Password}); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 	} else {
 		if err := s.sendRequestVerification(user); err != nil {
 			log.Printf("Request verification with err: %v", err)
@@ -192,7 +194,7 @@ func (s *Service) VerifyHandler(c *gin.Context) {
 	identity := uint64(claims["user_id"].(float64))
 
 	if _, err := s.DatabaseService.VerifyUser(c, &proto.UserRequest{Id: &identity}); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 	} else {
 		c.Status(http.StatusOK)
 	}
@@ -226,13 +228,20 @@ func (s *Service) RequestVerifyHandler(c *gin.Context) {
 }
 
 func (s *Service) sendRequestVerification(user *proto.UserResponse) error {
-	if _, err := middleware.GenerateToken(s.JWTSecret, func(claims jwt.MapClaims) {
+	if token, err := middleware.GenerateToken(s.JWTSecret, func(claims jwt.MapClaims) {
 		claims["user_id"] = user.Id
 		claims["email"] = user.Email
 	}); err != nil {
 		return err
 	} else {
-		return nil
-		//return user.RequestVerification(s.MailClient, generateToken.Token)
+		var mails []string
+		mails = append(mails, user.Email)
+		return rabbit.PublishToRabbitMQ(s.RabbitMQ, "mail", mail.Message{
+			Type:    mail.Html,
+			Subject: "Подтвердите почту",
+			File:    "request_verification.gohtml",
+			Data:    token.Token,
+			To:      mails,
+		})
 	}
 }
