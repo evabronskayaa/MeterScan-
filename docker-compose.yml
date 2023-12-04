@@ -1,21 +1,22 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:latest
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./docker:/docker-entrypoint-initdb.d/
-    environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_USER: root
-      POSTGRES_DB: dev
-    ports:
-      - "5432:5432"
-  api-server:
-    build: backend
-    ports:
-      - "8080:8080"
+  # postgres:
+  #   image: postgres:latest
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #     - ./docker:/docker-entrypoint-initdb.d/
+  #   environment:
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_USER: root
+  #     POSTGRES_DB: dev
+  #   ports:
+  #     - "5432:5432"
+  
+  # api-server:
+  #   build: backend
+  #   ports:
+  #     - "8080:8080"
 
   rabbitmq:
     image: rabbitmq:management
@@ -32,24 +33,19 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  consumer:
-    build:
-      context: .
-      dockerfile: ./consumer/Dockerfile
-    restart: on-failure
-    depends_on:
-      - rabbitmq
-    links:
-       - rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: rabbituser
-      RABBITMQ_DEFAULT_PASS: password
   
   ml:
     build: ml
     ports:
       - "50051"
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbituser
+      RABBITMQ_DEFAULT_PASS: password
 
 volumes:
   pgdata:

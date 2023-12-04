@@ -1,16 +1,14 @@
-FROM python:3.10-slim
-
-WORKDIR /app
+FROM python:3.10
+ 
+WORKDIR /consumer
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY requirements.txt requirements.txt
-RUN pip install --upgrade pip &&\
-    pip install -r requirements.txt
+RUN pip install poetry
 
-COPY . .
+COPY ./consumer /consumer
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
-
-CMD ["python", "./main.py"]
+RUN poetry install
+ 
+CMD ["poetry", "run", "python", "main.py"]
