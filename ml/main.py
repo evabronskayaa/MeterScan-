@@ -6,6 +6,7 @@ import base64
 
 import requests
 import pika
+from PIL import Image
 
 from text_detection import detect_objects_on_image, process_ocr_result, concat_all_results
 
@@ -25,22 +26,22 @@ def handle_message(ch, method, properties, body):
     request = json.loads(body_str)
     
     index = request.get('index')
-    image_data = request.get('image')
-    image = BytesIO(base64.b64decode(image_data))
+    image_url = request.get('image')
 
-    contours = detect_objects_on_image(image)
+    image_data = Image.open(requests.get(image_url, stream = True).raw)
+
+    contours = detect_objects_on_image(image_data)
     ocr_result = process_ocr_result()
-
     concat_results = concat_all_results(contours, ocr_result)
     
     payload = {
         'index': index,
         'results': concat_results
     }
-    
+
     payload_json = json.dumps(payload)
 
-    response = requests.post(f'http://{WEB_HOSTNAME}:{WEB_PORT}/predictions/', data=payload_json)
+    requests.post(f'http://{WEB_HOSTNAME}:{WEB_PORT}/predictions/', data=payload_json)
 
 
 def main():
