@@ -156,7 +156,7 @@ def concat_all_results(contours, ocr_result):
     processed_results = []
 
     for idx, result in enumerate(ocr_result):
-        box = np.array(contours[idx][:4], dtype=np.int32).tolist()
+        box = str(np.array(contours[idx][:4], dtype=np.int32).tolist())
         text = result[0]
         proba = result[1]
 
