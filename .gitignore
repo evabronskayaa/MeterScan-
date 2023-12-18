@@ -9,3 +9,9 @@
 *.sln
 *.sw?
 prod.env
+
+# Virtual env
+venv/
+
+#Models
+models/

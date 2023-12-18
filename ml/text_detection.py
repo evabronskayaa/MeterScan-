@@ -35,7 +35,7 @@ def prepare_input(buf):
 
 
 def run_model(input):
-    model = ort.InferenceSession("./models/water_meters_detector.onnx", providers=['CPUExecutionProvider'])
+    model = ort.InferenceSession("water_meters_detector.onnx", providers=['CPUExecutionProvider'])
     outputs = model.run(["output0"], {"images": input})
 
     return outputs[0]
@@ -143,22 +143,29 @@ def process_ocr_result():
         if len(ocr_result[0]) > 1:
             conf = ocr_result[0][0][-1][-1]
             result = ocr_result[0][0][-1][-2]
-            results.append([result, conf])
         else:
             result = ocr_result[0][-1][-1][-2]
             conf = ocr_result[0][-1][-1][-1]
-            results.append([result, conf])
+        
+        results.append([result, conf])
+
     return results
 
 
 def concat_all_results(contours, ocr_result):
-    result = []
+    processed_results = []
 
-    for i in range(0, len(contours), 1):
-        box = np.array(contours[i][:4], dtype=np.int32).tolist()
-        text = ocr_result[i][0]
-        proba = ocr_result[i][1]
+    for idx, result in enumerate(ocr_result):
+        box = np.array(contours[idx][:4], dtype=np.int32).tolist()
+        text = result[0]
+        proba = result[1]
 
-        result.append([text, proba, box])
+        result = {
+            'box': box,
+            'text': text,
+            'metric': proba
+        }
 
-    return result
+        processed_results.append(result)
+
+    return processed_results

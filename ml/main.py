@@ -1,44 +1,64 @@
-from concurrent import futures
+import os
+import sys
+import json
+from io import BytesIO
+import base64
 
-import grpc
+import requests
+import pika
+from PIL import Image
 
-from proto import image_pb2_grpc, image_pb2
 from text_detection import detect_objects_on_image, process_ocr_result, concat_all_results
 
+USER = 'rabbituser'
+PASSWORD = 'password'
+BROKER_HOSTNAME = 'rabbitmq'
+QUEUE_NAME = 'predictions'
 
-class ImageProcessingService(image_pb2_grpc.ImageProcessingServiceServicer):
-    def ProcessImage(self, request_iterator, context):
-        for request in request_iterator:
-            image = request.image
+WEB_HOSTNAME = 'backend'
+WEB_PORT = '80'
 
-            image_path = 'images/temp'
-            with open(image_path, 'wb') as f:
-                f.write(image)
-
-            contours = detect_objects_on_image(image_path)
-            ocr_result = process_ocr_result()
-
-            concat_results = concat_all_results(contours, ocr_result)
-
-            pb2_results = []
-            for result in concat_results:
-                pb2_result = image_pb2.RecognitionResult(recognition=result[0],
-                                                         metric=result[1],
-                                                         scope=image_pb2.Scope(
-                                                             x1=result[2][0], y1=result[2][1],
-                                                             x2=result[2][2], y2=result[2][3]))
-                pb2_results.append(pb2_result)
-
-            yield image_pb2.ImageResponse(index=request.index, results=pb2_results)
+CONNECTION_URL = f'amqp://{USER}:{PASSWORD}@{BROKER_HOSTNAME}:5672/%2f'
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    image_pb2_grpc.add_ImageProcessingServiceServicer_to_server(ImageProcessingService(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
-    server.wait_for_termination()
+def handle_message(ch, method, properties, body):
+    body_str = body.decode('utf-8')
+    request = json.loads(body_str)
+    
+    index = request.get('index')
+    image_url = request.get('image')
+
+    image_data = Image.open(requests.get(image_url, stream = True).raw)
+
+    contours = detect_objects_on_image(image_data)
+    ocr_result = process_ocr_result()
+    concat_results = concat_all_results(contours, ocr_result)
+    
+    payload = {
+        'index': index,
+        'results': concat_results
+    }
+
+    payload_json = json.dumps(payload)
+
+    requests.post(f'http://{WEB_HOSTNAME}:{WEB_PORT}/predictions/', data=payload_json)
+
+
+def main():
+    connection = pika.BlockingConnection(pika.URLParameters(CONNECTION_URL))
+    channel = connection.channel()
+
+    channel.queue_declare(queue=QUEUE_NAME)
+    channel.basic_consume(queue=QUEUE_NAME, auto_ack=True, on_message_callback=handle_message)
+    channel.start_consuming()
 
 
 if __name__ == '__main__':
-    serve()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
