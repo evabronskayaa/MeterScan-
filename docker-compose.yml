@@ -80,21 +80,21 @@ services:
       - minio
       - database
       - mail
-      - ml
+      #- ml
 
-  ml:
-    build: ml
-    environment:
-      PORT: ${ML_PORT}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "${ML_PORT}"
-    restart: on-failure
-    depends_on:
-      - rabbitmq
-    links:
-      - rabbitmq
+  #ml:
+  #  build: ml
+  #  environment:
+  #    PORT: ${ML_PORT}
+  #    RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+  #    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+  #  ports:
+  #    - "${ML_PORT}"
+  #  restart: on-failure
+  #  depends_on:
+  #    - rabbitmq
+  #  links:
+  #    - rabbitmq
 
   minio:
     image: minio/minio

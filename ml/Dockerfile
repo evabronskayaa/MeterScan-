@@ -1,13 +1,13 @@
 FROM python:3.10
  
-WORKDIR /consumer
+WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN pip install poetry
 
-COPY ./consumer /consumer
+COPY . .
 
 RUN poetry install
  

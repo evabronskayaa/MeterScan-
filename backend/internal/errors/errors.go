@@ -13,4 +13,5 @@ const (
 	ErrCreatePassword   SimpleError = "Произошла ошибка при хэшировании пароля"
 	ErrSaveUser         SimpleError = "Произошла ошибка при сохранении пользователя"
 	ErrAlreadyVerified  SimpleError = "Ваш аккаунт уже подтвержден"
+	ErrSavePrediction   SimpleError = "Произошла ошибка при сохранении распознавания"
 )

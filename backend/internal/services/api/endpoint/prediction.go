@@ -4,22 +4,19 @@ import (
 	"backend/internal/dto"
 	"backend/internal/errors"
 	"backend/internal/proto"
-	"backend/internal/services/api/media"
-	"bytes"
+	"backend/internal/rabbit"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io"
+	"github.com/minio/minio-go/v7"
 	"log"
-	"mime/multipart"
 	"net/http"
-	"sync"
+	"time"
 )
 
 const (
 	ErrInvalidForm   errors.SimpleError = "Отсутствуют файлы"
 	ErrNotFoundFiles errors.SimpleError = "Файлы не найдены"
-	ErrCreateStream  errors.SimpleError = "Произошла ошибка при создании запроса для распознавания"
 )
 
 // PredictHandler godoc
@@ -29,7 +26,7 @@ const (
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			files	formData	file			true	"Файлы"
-//	@Success		200		{object}	[]schema.Prediction
+//	@Success		200		{object}	[]proto.Prediction
 //	@Failure		400		{object}	string
 //	@Failure		500		{object}	string
 //	@Router			/predictions [post]
@@ -46,73 +43,42 @@ func (s *Service) PredictHandler(c *gin.Context) {
 		return
 	}
 
-	stream, err := s.ImageProcessingService.ProcessImage(context.Background())
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, ErrCreateStream)
-		return
-	}
-
 	user := c.MustGet("user").(*proto.UserResponse)
-	var wg sync.WaitGroup
 	predictions := make([]*proto.Prediction, 0)
-	errors := make(chan error)
+	recognitionErrs := make(chan error)
 
-	for i, file := range files {
-		wg.Add(1)
-		go func(i int, file *multipart.FileHeader) {
-			defer wg.Done()
-			open, err := file.Open()
-			if err != nil {
-				errors <- fmt.Errorf("file open error: %v", err)
-				return
-			}
-			defer open.Close()
+	for _, file := range files {
+		open, err := file.Open()
+		if err != nil {
+			recognitionErrs <- fmt.Errorf("file open error: %v", err)
+			continue
+		}
+		defer open.Close()
 
-			buf := bytes.NewBuffer(nil)
-			if _, err := io.Copy(buf, open); err != nil {
-				errors <- fmt.Errorf("file read error: %v", err)
-				return
-			}
-
-			req := &proto.ImageRequest{Image: buf.Bytes()}
-			if err := stream.Send(req); err != nil {
-				errors <- fmt.Errorf("stream send error: %v", err)
-				return
-			}
-
-			resp, err := stream.Recv()
-			if err == io.EOF {
-				return
-			} else if err != nil {
-				errors <- fmt.Errorf("stream receive error: %v", err)
-				return
-			}
-
-			prediction, err := s.DatabaseService.AddPrediction(c, &proto.AddPredictionRequest{UserId: user.Id, Results: resp.Results})
-			if err != nil {
-				errors <- fmt.Errorf("add prediction error: %v", err)
-				return
-			}
-			fileName := prediction.ImageName
-			predictions = append(predictions, prediction)
-			if _, err := media.SaveData("prediction", fileName, buf.Bytes()); err != nil {
-				errors <- fmt.Errorf("file save error: %v", err)
-				return
-			}
-		}(i, file)
+		prediction, err := s.DatabaseService.AddPrediction(c, &proto.AddPredictionRequest{UserId: user.Id})
+		fileName := prediction.ImageName
+		if info, err := s.S3Client.PutObject(context.Background(), "recognized-images", fileName, open, file.Size, minio.PutObjectOptions{
+			Expires: time.Now().Add(3 * 30 * 24 * time.Hour),
+		}); err != nil {
+			log.Printf("file save error: %v", err)
+			recognitionErrs <- fmt.Errorf("file save error: %v", err)
+			continue
+		} else if err := rabbit.PublishToRabbitMQ(s.RabbitMQ, "predictions", rabbit.Prediction{
+			Index: prediction.Id,
+			Image: fmt.Sprintf("%v/%v/%v", s.S3Client.EndpointURL(), info.Bucket, fileName),
+		}); err != nil {
+			log.Printf("publish to rabbit error: %v", err)
+			recognitionErrs <- fmt.Errorf("publish to rabbit error: %v", err)
+			continue
+		}
 	}
 
-	wg.Wait()
+	close(recognitionErrs)
+	log.Printf("%v", recognitionErrs)
 
-	if err := stream.CloseSend(); err != nil {
-		log.Println("Failed to close stream:", err)
-	}
-
-	close(errors)
-
-	if len(errors) > 0 {
+	if len(recognitionErrs) > 0 {
 		var errMessages []string
-		for err := range errors {
+		for err := range recognitionErrs {
 			errMessages = append(errMessages, err.Error())
 		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"errors": errMessages})

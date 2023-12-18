@@ -63,10 +63,8 @@ func NewService() *service.Service {
 	databaseClient := proto.NewDatabaseServiceClient(grpcConn)
 
 	s3Client, err := minio.New(config.MinioEndpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.MinioAccessKey, config.MinioSecretAccessKey, ""),
-		Secure: true,
+		Creds: credentials.NewStaticV4(config.MinioAccessKey, config.MinioSecretAccessKey, ""),
 	})
-
 	if err != nil {
 		panic(err)
 	}

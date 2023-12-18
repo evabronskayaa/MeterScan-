@@ -1,8 +1,6 @@
 import os
 import sys
 import json
-from io import BytesIO
-import base64
 
 import requests
 import pika
@@ -10,15 +8,16 @@ from PIL import Image
 
 from text_detection import detect_objects_on_image, process_ocr_result, concat_all_results
 
-USER = 'rabbituser'
+USER = 'user'
 PASSWORD = 'password'
-BROKER_HOSTNAME = 'rabbitmq'
+BROKER_HOSTNAME = 'localhost'
+PORT = 5672
 QUEUE_NAME = 'predictions'
 
-WEB_HOSTNAME = 'backend'
-WEB_PORT = '80'
+WEB_HOSTNAME = 'localhost'
+WEB_PORT = '8080'
 
-CONNECTION_URL = f'amqp://{USER}:{PASSWORD}@{BROKER_HOSTNAME}:5672/%2f'
+CONNECTION_URL = f'amqp://{USER}:{PASSWORD}@{BROKER_HOSTNAME}:{PORT}/'
 
 
 def handle_message(ch, method, properties, body):
@@ -26,7 +25,7 @@ def handle_message(ch, method, properties, body):
     request = json.loads(body_str)
     
     index = request.get('index')
-    image_url = request.get('image')
+    image_url = request.get('image').replace('minio', 'localhost')
 
     image_data = Image.open(requests.get(image_url, stream = True).raw)
 
@@ -48,7 +47,7 @@ def main():
     connection = pika.BlockingConnection(pika.URLParameters(CONNECTION_URL))
     channel = connection.channel()
 
-    channel.queue_declare(queue=QUEUE_NAME)
+    channel.queue_declare(queue=QUEUE_NAME, durable=True)
     channel.basic_consume(queue=QUEUE_NAME, auto_ack=True, on_message_callback=handle_message)
     channel.start_consuming()
 

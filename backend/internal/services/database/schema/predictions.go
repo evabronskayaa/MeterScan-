@@ -1,6 +1,9 @@
 package schema
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"backend/internal/proto"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Prediction struct {
 	ID        uint64      `gorm:"primarykey" json:"-"`
@@ -25,4 +28,32 @@ type Scope struct {
 	Y1 uint32 `json:"y1"`
 	X2 uint32 `json:"x2"`
 	Y2 uint32 `json:"y2"`
+}
+
+func (i *PredictionInfo) Proto() *proto.RecognitionResult {
+	return &proto.RecognitionResult{
+		Id:          &i.ID,
+		Metric:      i.Metric,
+		Recognition: i.ValidMeterReadings,
+		Scope: &proto.Scope{
+			X1: i.Scope.X1,
+			Y1: i.Scope.Y1,
+			X2: i.Scope.X2,
+			Y2: i.Scope.Y2,
+		},
+	}
+}
+
+func (p *Prediction) Proto() *proto.Prediction {
+	value, _ := p.ImageName.Value()
+	imageName := value.(string)
+	var results []*proto.RecognitionResult
+	for _, value := range p.PredictionInfos {
+		results = append(results, value.Proto())
+	}
+	return &proto.Prediction{
+		Id:        p.ID,
+		ImageName: imageName,
+		Results:   results,
+	}
 }
