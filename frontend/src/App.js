@@ -1,25 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.scss";
+import MainPage from "./pages/MainPage/MainPage";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import RegisterPage from "./pages/RegisterPage/RegisterPage";
+import authService from "./services/auth.service";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { useState } from "react";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const user = authService.getCurrentUser();
+  var [page, setPage] = useState("register")
+
+  if (user)
+  return (<MainPage email={user}/>);
+  else if (page === "register")
+  return (<RegisterPage redirect={setPage}/>)
+  else return (<LoginPage redirect={setPage}/>)
+;
 }
 
 export default App;
