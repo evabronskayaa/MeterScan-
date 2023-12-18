@@ -3,6 +3,7 @@ import AuthService from "../../services/auth.service";
 import LoginPage from "../LoginPage/LoginPage";
 import "../../styles/form.scss";
 import { isEmail } from "validator";
+import {NavLink} from "react-router-dom";
 
 const required = (value) => {
   if (!value) {
@@ -66,7 +67,7 @@ const RegisterPage = (props) => {
   };
 
   return (
-    <div className="col-md-12">
+    <div className="col-md-12 container">
       <p className="center">MeterScan+</p>
       <div className="card card-container">
         <p className="center">Регистрация</p>
@@ -103,14 +104,11 @@ const RegisterPage = (props) => {
                 </button>
               </div>
 
-              <p
-                className="center no-acc"
-                onClick={() =>
-                  props.redirect(<LoginPage redirect={props.redirect} />)
-                }
-              >
-                Уже есть аккаунт
-              </p>
+              <NavLink to='/login'>
+                <p className="center no-acc">
+                  Уже есть аккаунт
+                </p>
+              </NavLink>
             </div>
           )}
 

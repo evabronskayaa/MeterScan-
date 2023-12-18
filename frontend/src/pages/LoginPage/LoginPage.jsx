@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import AuthService from "../../services/auth.service";
 import "../../styles/form.scss";
+import {NavLink} from "react-router-dom";
 
-const LoginPage = (props) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,13 +95,11 @@ const LoginPage = (props) => {
           )}
 
           <input type="checkbox" style={{ display: "none" }} />
-          <p className="no-acc center"
-          onClick={() =>
-            props.redirect("register")
-          }
-        >
-          еще нет аккаунта?
-        </p>
+          <NavLink to='/register'>
+            <p className="no-acc center">
+              еще нет аккаунта?
+            </p>
+          </NavLink>
         </form>
       </div>
         
