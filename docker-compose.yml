@@ -56,8 +56,8 @@ services:
       - .env
       - prod.env
     depends_on:
-      rabbitmq:
-        condition: service_healthy
+      - rabbitmq
+      - database
 
   api:
     build:
@@ -78,9 +78,8 @@ services:
       - "8080:${API_PORT}"
     depends_on:
       - minio
-      - database
       - mail
-      #- ml
+      - ml
 
   ml:
     build: ml
