@@ -161,7 +161,7 @@ def concat_all_results(contours, ocr_result):
         text = result[0]
         proba = result[1]
 
-        result = database_pb2.RecognitionResult(recognition=text, metric=proba,
+        result = database_pb2.RecognitionResult(recognition=text[:5], metric=proba,
                                              scope=database_pb2.Scope(x1=box[0], y1=box[1], x2=box[2], y2=box[3]))
 
         processed_results.append(result)
