@@ -69,7 +69,11 @@ func (s *Service) LoginHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.UserWithToken{
-		User:  user,
+		User: dto.User{
+			ID:        user.Id,
+			Email:     user.Email,
+			Validated: user.Verified,
+		},
 		Token: obj,
 	})
 }
@@ -112,7 +116,11 @@ func (s *Service) RegisterHandler(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, dto.UserWithToken{
-			User:  user,
+			User: dto.User{
+				ID:        user.Id,
+				Email:     user.Email,
+				Validated: user.Verified,
+			},
 			Token: obj,
 		})
 	}

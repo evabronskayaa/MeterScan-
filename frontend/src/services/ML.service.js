@@ -11,12 +11,7 @@ class MLService {
       headers: authHeader(),
     })).data;
 
-    const len = response[0]["results"].length;
-    if (len === 1)
-      return response[0]["results"]["recognition"]
-    else{
-      return response[0]["results"].map(item => item.recognition);
-    }
+    return response[0]["results"].map(item => item.recognition);
   }
 }
 

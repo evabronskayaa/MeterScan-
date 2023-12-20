@@ -1,7 +1,5 @@
 package dto
 
-import "backend/internal/proto"
-
 type Token struct {
 	Token   string `json:"token"`
 	Expire  string `json:"expire" example:"2006-01-02T15:04:05Z07:00"`
@@ -9,8 +7,8 @@ type Token struct {
 }
 
 type UserWithToken struct {
-	User  *proto.UserResponse `json:"user"`
-	Token *Token              `json:"token"`
+	User  User   `json:"user"`
+	Token *Token `json:"token"`
 }
 
 type User struct {

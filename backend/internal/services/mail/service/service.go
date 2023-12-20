@@ -44,6 +44,8 @@ func (s *Service) Start() error {
 	log.Println("Successfully connected to RabbitMQ")
 	log.Println("Waiting for messages")
 
+	stopChan := make(chan bool)
+
 	go func() {
 		for message := range messages {
 			var m mail.Message
@@ -66,6 +68,8 @@ func (s *Service) Start() error {
 			}
 		}
 	}()
+
+	<-stopChan
 	return nil
 }
 
