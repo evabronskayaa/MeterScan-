@@ -19,7 +19,6 @@ type Config struct {
 	Port                 int    `required:"true"`
 	JWTSecret            string `required:"true"`
 	ReCaptchaSecret      string `required:"true"`
-	GRPCServer           string `required:"true"`
 	DatabaseService      string `required:"true"`
 	RabbitMQ             string `required:"true"`
 	MinioEndpoint        string `required:"true"`
@@ -30,13 +29,6 @@ type Config struct {
 func NewService() *service.Service {
 	var config Config
 	envconfig.MustProcess("api", &config)
-
-	conn, err := grpc.Dial(config.GRPCServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		panic(err)
-	}
-
-	client := proto.NewImageProcessingServiceClient(conn)
 	reCaptcha := util.ReCaptcha{
 		Secret:  config.ReCaptchaSecret,
 		Timeout: time.Second * 5,
@@ -62,13 +54,12 @@ func NewService() *service.Service {
 	}
 
 	s := &service.Service{
-		ReCaptcha:              reCaptcha,
-		JWTSecret:              []byte(config.JWTSecret),
-		ImageProcessingService: client,
-		Pagination:             paginate.New(),
-		DatabaseService:        databaseClient,
-		RabbitMQ:               rabbitmq,
-		S3Client:               s3Client,
+		ReCaptcha:       reCaptcha,
+		JWTSecret:       []byte(config.JWTSecret),
+		Pagination:      paginate.New(),
+		DatabaseService: databaseClient,
+		RabbitMQ:        rabbitmq,
+		S3Client:        s3Client,
 	}
 	s.Router = router.ConfigureRouter(s, config.Port)
 	return s

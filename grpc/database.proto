@@ -1,7 +1,4 @@
 syntax = "proto3";
-package grpc.database;
-
-import "image.proto";
 
 option go_package = "/proto";
 
@@ -16,6 +13,7 @@ service DatabaseService {
   rpc GetEmailsForNotification(GetEmailsForNotificationRequest) returns (EmailsResponse);
   rpc GetSettings(UserRequest) returns (Settings);
   rpc UpdateSettings(UpdateSettingsRequest) returns (Empty);
+  rpc GetPrediction(GetPredictionsRequest) returns (Prediction);
 }
 
 message UpdateSettingsRequest {
@@ -61,7 +59,7 @@ message GetPredictionsResponse {
 message Prediction {
   uint64 id = 1;
   string image_name = 2;
-  repeated grpc.image.RecognitionResult results = 3;
+  repeated RecognitionResult results = 3;
 }
 
 message UpdatePredictionRequest {
@@ -72,12 +70,26 @@ message UpdatePredictionRequest {
 
 message UpdateFullPredictionRequest {
   uint64 id = 1;
-  repeated grpc.image.RecognitionResult results = 2;
+  repeated RecognitionResult results = 2;
 }
 
 message AddPredictionRequest {
   uint64 user_id = 1;
-  repeated grpc.image.RecognitionResult results = 2;
+  repeated RecognitionResult results = 2;
 }
 
 message Empty {}
+
+message RecognitionResult {
+  string recognition = 1;
+  float metric = 2;
+  Scope scope = 3;
+  optional uint64 id = 4;
+}
+
+message Scope {
+  uint32 x1 = 1;
+  uint32 y1 = 2;
+  uint32 x2 = 3;
+  uint32 y2 = 4;
+}

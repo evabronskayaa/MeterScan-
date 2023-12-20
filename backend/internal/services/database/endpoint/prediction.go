@@ -78,3 +78,11 @@ func (s GRPCServer) UpdateFullPrediction(ctx context.Context, request *proto.Upd
 
 	return &proto.Empty{}, nil
 }
+
+func (s GRPCServer) GetPrediction(_ context.Context, request *proto.GetPredictionsRequest) (*proto.Prediction, error) {
+	var prediction *schema.Prediction
+	if s.DB.Preload("PredictionInfos").Where("id = ?", request.Id).First(&prediction).Error != nil {
+		return nil, errors.ErrNotFoundPrediction
+	}
+	return prediction.Proto(), nil
+}

@@ -13,14 +13,13 @@ import (
 )
 
 type Service struct {
-	Router                 *http.Server
-	ReCaptcha              util.ReCaptcha
-	JWTSecret              []byte
-	ImageProcessingService proto.ImageProcessingServiceClient
-	Pagination             *paginate.Pagination
-	DatabaseService        proto.DatabaseServiceClient
-	RabbitMQ               *amqp.Connection
-	S3Client               *minio.Client
+	Router          *http.Server
+	ReCaptcha       util.ReCaptcha
+	JWTSecret       []byte
+	Pagination      *paginate.Pagination
+	DatabaseService proto.DatabaseServiceClient
+	RabbitMQ        *amqp.Connection
+	S3Client        *minio.Client
 }
 
 func (s *Service) Start() error {

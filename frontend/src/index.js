@@ -16,12 +16,6 @@ import authService from "./services/auth.service";
 import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
-    <Route path="/register" Component={RegisterPage}/>
-    <Route path="/login" Component={LoginPage}/>
-    <Route path="/" Component={MainPage}/>
-</Route>))
-
 export const RemoveTrailingSlash = ({ ...rest }) => {
     const location = useLocation()
 
@@ -63,6 +57,12 @@ const Root = () => {
         <ScrollRestoration/>
     </>
 }
+
+const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
+    <Route path="/register" Component={RegisterPage}/>
+    <Route path="/login" Component={LoginPage}/>
+    <Route path="/" Component={MainPage}/>
+</Route>))
 
 ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode>
     <RouterProvider router={router}/>

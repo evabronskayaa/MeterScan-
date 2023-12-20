@@ -13,9 +13,9 @@ class MLService {
 
     const len = response[0]["results"].length;
     if (len === 1)
-      return response[0]["results"]["meter_readings"]
+      return response[0]["results"]["recognition"]
     else{
-      return response[0]["results"].map(item => item.meter_readings);
+      return response[0]["results"].map(item => item.recognition);
     }
   }
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"time"
 )
@@ -53,9 +54,14 @@ func (s *Service) PredictHandler(c *gin.Context) {
 			recognitionErrs <- fmt.Errorf("file open error: %v", err)
 			continue
 		}
-		defer open.Close()
+		defer func(open multipart.File) {
+			if err := open.Close(); err != nil {
+				log.Println(err)
+			}
+		}(open)
 
 		prediction, err := s.DatabaseService.AddPrediction(c, &proto.AddPredictionRequest{UserId: user.Id})
+		predictions = append(predictions, prediction)
 		fileName := prediction.ImageName
 		if info, err := s.S3Client.PutObject(context.Background(), "recognized-images", fileName, open, file.Size, minio.PutObjectOptions{
 			Expires: time.Now().Add(3 * 30 * 24 * time.Hour),
@@ -73,9 +79,6 @@ func (s *Service) PredictHandler(c *gin.Context) {
 		}
 	}
 
-	close(recognitionErrs)
-	log.Printf("%v", recognitionErrs)
-
 	if len(recognitionErrs) > 0 {
 		var errMessages []string
 		for err := range recognitionErrs {
@@ -85,7 +88,48 @@ func (s *Service) PredictHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, predictions)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	defer func() {
+		close(recognitionErrs)
+	}()
+
+	needCancel := false
+	for {
+		select {
+		case <-ticker.C:
+			for i, prediction := range predictions {
+				newPrediction, err := s.DatabaseService.GetPrediction(ctx, &proto.GetPredictionsRequest{Id: prediction.Id})
+				if err != nil {
+					recognitionErrs <- err
+					continue
+				}
+				predictions[i] = newPrediction
+				if len(newPrediction.Results) > 0 {
+					needCancel = true
+				}
+			}
+			if needCancel {
+				if len(recognitionErrs) > 0 {
+					var errMessages []string
+					for err := range recognitionErrs {
+						errMessages = append(errMessages, err.Error())
+					}
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"errors": errMessages})
+					return
+				}
+				c.JSON(http.StatusOK, predictions)
+				return
+			}
+		case <-ctx.Done():
+			c.Status(http.StatusRequestTimeout)
+			return
+		}
+	}
 }
 
 // UpdatePredictHandler godoc

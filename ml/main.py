@@ -1,15 +1,13 @@
+import json
 import os
 import sys
-import json
 
 import grpc
-import requests
 import pika
+import requests
 from PIL import Image
 
-from ml.proto.database_pb2 import UpdateFullPredictionRequest
-from ml.proto.database_pb2_grpc import DatabaseServiceStub
-from ml.proto.image_pb2 import RecognitionResult, Scope
+from proto import database_pb2, database_pb2_grpc
 from text_detection import detect_objects_on_image, process_ocr_result, concat_all_results
 
 USER = 'user'
@@ -18,7 +16,7 @@ BROKER_HOSTNAME = 'rabbitmq'
 PORT = 5672
 QUEUE_NAME = 'predictions'
 
-DATABASE = ''
+DATABASE = 'database:3333'
 
 CONNECTION_URL = f'amqp://{USER}:{PASSWORD}@{BROKER_HOSTNAME}:{PORT}/'
 
@@ -35,18 +33,10 @@ def handle_message(ch, method, properties, body):
     contours = detect_objects_on_image(image_data)
     ocr_result = process_ocr_result()
 
-    pb2_results = []
-    for result in concat_all_results(contours, ocr_result):
-        pb2_result = RecognitionResult(recognition=result[0],
-                                       metric=result[1],
-                                       scope=Scope(
-                                           x1=result[2][0], y1=result[2][1],
-                                           x2=result[2][2], y2=result[2][3]))
-        pb2_results.append(pb2_result)
-
     with grpc.insecure_channel(DATABASE) as channel:
-        stub = DatabaseServiceStub(channel)
-        stub.UpdateFullPrediction(UpdateFullPredictionRequest(id=index, results=pb2_results))
+        stub = database_pb2_grpc.DatabaseServiceStub(channel)
+        stub.UpdateFullPrediction(
+            database_pb2.UpdateFullPredictionRequest(id=index, results=concat_all_results(contours, ocr_result)))
 
 
 def main():
