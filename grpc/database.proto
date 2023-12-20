@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+option go_package = "/proto";
+
+service DatabaseService {
+  rpc GetUser(UserRequest) returns (UserResponse);
+  rpc CreateUser(UserRequest) returns (UserResponse);
+  rpc VerifyUser(UserRequest) returns (Empty);
+  rpc GetPredictions(GetPredictionsRequest) returns (GetPredictionsResponse);
+  rpc UpdatePrediction(UpdatePredictionRequest) returns (Empty);
+  rpc AddPrediction(AddPredictionRequest) returns (Prediction);
+  rpc UpdateFullPrediction(UpdateFullPredictionRequest) returns (Empty);
+  rpc GetEmailsForNotification(GetEmailsForNotificationRequest) returns (EmailsResponse);
+  rpc GetSettings(UserRequest) returns (Settings);
+  rpc UpdateSettings(UpdateSettingsRequest) returns (Empty);
+  rpc GetPrediction(GetPredictionsRequest) returns (Prediction);
+}
+
+message UpdateSettingsRequest {
+  uint64 id = 1;
+  Settings settings = 2;
+}
+
+message Settings {
+  optional uint32 notification_day_of_month = 1;
+  optional uint32 notification_hour = 2;
+}
+
+message GetEmailsForNotificationRequest {
+  int32 day = 1;
+  int32 hour = 2;
+}
+
+message EmailsResponse {
+  repeated string emails = 1;
+}
+
+message UserRequest {
+  optional uint64 id = 1;
+  optional string email = 2;
+  optional string password = 3;
+}
+
+message UserResponse {
+  uint64 id = 1;
+  string email = 2;
+  string password = 3;
+  bool verified = 4;
+}
+
+message GetPredictionsRequest {
+  uint64 id = 1;
+}
+
+message GetPredictionsResponse {
+  repeated Prediction predictions = 1;
+}
+
+message Prediction {
+  uint64 id = 1;
+  string image_name = 2;
+  repeated RecognitionResult results = 3;
+}
+
+message UpdatePredictionRequest {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string valid_meter_readings = 3;
+}
+
+message UpdateFullPredictionRequest {
+  uint64 id = 1;
+  repeated RecognitionResult results = 2;
+}
+
+message AddPredictionRequest {
+  uint64 user_id = 1;
+  repeated RecognitionResult results = 2;
+}
+
+message Empty {}
+
+message RecognitionResult {
+  string recognition = 1;
+  float metric = 2;
+  Scope scope = 3;
+  optional uint64 id = 4;
+}
+
+message Scope {
+  uint32 x1 = 1;
+  uint32 y1 = 2;
+  uint32 x2 = 3;
+  uint32 y2 = 4;
+}

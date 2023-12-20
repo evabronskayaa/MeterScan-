@@ -1,17 +1,69 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React from "react";
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import ReactDOM from 'react-dom/client'
+import RegisterPage from "./pages/RegisterPage/RegisterPage";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import {
+    createBrowserRouter,
+    createRoutesFromElements,
+    Navigate, Outlet,
+    Route,
+    RouterProvider, ScrollRestoration,
+    useLocation
+} from "react-router-dom";
+import MainPage from "./pages/MainPage/MainPage";
+import authService from "./services/auth.service";
+import "./App.scss";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+export const RemoveTrailingSlash = ({ ...rest }) => {
+    const location = useLocation()
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+    // If the last character of the url is '/'
+    if (location.pathname.match('/.*/$')) {
+        return <Navigate replace { ...rest } to={ {
+            pathname: location.pathname.replace(/\/+$/, ''),
+            search: location.search
+        } }/>
+    } else return null
+}
+
+const pagesWithNoAuth = ['/login', '/register']
+
+const AuthRedirector = ({children}) => {
+    const user = authService.getCurrentUser()
+    const location = useLocation()
+    const path = location.pathname
+
+    if (!user) {
+        if (!pagesWithNoAuth.includes(path)) {
+            return <Navigate to='/login' state={{from: location}} replace/>
+        }
+    } else if (pagesWithNoAuth.includes(path)) {
+        if (location.state?.from)
+            return <Navigate to={ location.state.from } replace/>
+        return <Navigate to="/" replace/>
+    }
+
+    return children
+}
+
+const Root = () => {
+    return <>
+        <RemoveTrailingSlash/>
+        <AuthRedirector>
+            <Outlet/>
+        </AuthRedirector>
+        <ScrollRestoration/>
+    </>
+}
+
+const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
+    <Route path="/register" Component={RegisterPage}/>
+    <Route path="/login" Component={LoginPage}/>
+    <Route path="/" Component={MainPage}/>
+</Route>))
+
+ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode>
+    <RouterProvider router={router}/>
+</React.StrictMode>)
