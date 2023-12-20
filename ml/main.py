@@ -10,11 +10,11 @@ from text_detection import detect_objects_on_image, process_ocr_result, concat_a
 
 USER = 'user'
 PASSWORD = 'password'
-BROKER_HOSTNAME = 'localhost'
+BROKER_HOSTNAME = 'rabbitmq'
 PORT = 5672
 QUEUE_NAME = 'predictions'
 
-WEB_HOSTNAME = 'localhost'
+WEB_HOSTNAME = 'web'
 WEB_PORT = '8080'
 
 CONNECTION_URL = f'amqp://{USER}:{PASSWORD}@{BROKER_HOSTNAME}:{PORT}/'
@@ -25,7 +25,7 @@ def handle_message(ch, method, properties, body):
     request = json.loads(body_str)
     
     index = request.get('index')
-    image_url = request.get('image').replace('minio', 'localhost')
+    image_url = request.get('image')
 
     image_data = Image.open(requests.get(image_url, stream = True).raw)
 
