@@ -6,11 +6,14 @@ const TransmissionCard = (props) => {
   const [clicked, setClick] = useState(true);
 
   const handleChange = (e) => {
-    const input = e.target.textContent;
-    if (!isNaN(input)) {
-      setValue(input);
-    } else {
-      e.target.textContent = value;
+    if (clicked) {
+      const input = e.target.textContent;
+      if (!isNaN(input)) {
+        setValue(input);
+        props.onConfirmation(input);
+      } else {
+        e.target.textContent = value;
+      }
     }
   };
 
@@ -21,7 +24,7 @@ const TransmissionCard = (props) => {
           <p>Текущие показания счетчика</p>
           <div
             className="custom-input"
-            contentEditable="true"
+            contentEditable={clicked ? "true" : "false"}
             onInput={handleChange}
           >
             {value}

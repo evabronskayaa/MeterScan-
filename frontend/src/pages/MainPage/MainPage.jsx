@@ -16,8 +16,15 @@ const MainPage = (props) => {
   const [value, setValue] = useState();
 
   const handleLogout = (e) => {
-    authService.logout()
+    authService.logout();
     window.location.reload();
+  };
+
+  const handleConfirmation = (index, newValue) => {
+    const updatedValue = [...value];
+    updatedValue[0].results[index].valid_meter_readings = newValue;
+    setValue(updatedValue);
+    console.log(value);
   };
 
   if (selectedImage && stage === stages.upload) changeStage(stages.analyze);
@@ -84,9 +91,9 @@ const MainPage = (props) => {
           <button
             className="basic-button black-button"
             onClick={() => {
-              MLService.predict(selectedImage).then(r => {
-                  changeStage(stages.send);
-                  setValue(r);
+              MLService.predict(selectedImage).then((r) => {
+                changeStage(stages.send);
+                setValue(r);
               });
             }}
           >
@@ -121,27 +128,25 @@ const MainPage = (props) => {
             src={URL.createObjectURL(selectedImage)}
             alt="pic lost"
           />
-          {typeof value === "object" ? (
-            <>
-              <Slider className="carousel border" dots accessibility={false}>
-                {value.map((item, index) => (
-                  <div key={index} className="carousel-item">
-                    <TransmissionCard value={item} />
-                  </div>
-                ))}
-                <div className="carousel-item">
-                  <p>Если вы подтвердили все показания, то самое время</p>
-                  <button className="basic-button black-button">
-                    Передать показания
-                  </button>
-                </div>
-              </Slider>
-            </>
-          ) : (
-            <>
-              <TransmissionCard value={value} />
-            </>
-          )}
+
+          <Slider className="carousel border" dots accessibility={false}>
+            {value[0].results.map((item, index) => (
+              <div key={index} className="carousel-item">
+                <TransmissionCard
+                  onConfirmation={(newValue) =>
+                    handleConfirmation(index, newValue)
+                  }
+                  value={item.valid_meter_readings}
+                />
+              </div>
+            ))}
+            <div className="carousel-item">
+              <p>Если вы подтвердили все показания, то самое время</p>
+              <button className="basic-button black-button">
+                Передать показания
+              </button>
+            </div>
+          </Slider>
         </div>
       </>
     );
