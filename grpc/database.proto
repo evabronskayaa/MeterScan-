@@ -13,6 +13,16 @@ service DatabaseService {
   rpc UpdatePrediction(UpdatePredictionRequest) returns (Empty);
   rpc AddPrediction(AddPredictionRequest) returns (Prediction);
   rpc UpdateFullPrediction(UpdateFullPredictionRequest) returns (Empty);
+  rpc GetEmailsForNotification(GetEmailsForNotificationRequest) returns (EmailsResponse);
+}
+
+message GetEmailsForNotificationRequest {
+  int32 day = 1;
+  int32 hour = 2;
+}
+
+message EmailsResponse {
+  repeated string emails = 1;
 }
 
 message UserRequest {

@@ -6,7 +6,6 @@ import (
 	"backend/internal/services/api/router"
 	"backend/internal/services/api/service"
 	"backend/internal/util"
-	"github.com/go-co-op/gocron"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -48,13 +47,6 @@ func NewService() *service.Service {
 		panic(err)
 	}
 
-	now := time.Now()
-	nextSchedule := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-	cron := gocron.NewScheduler(now.Location()).
-		Every(1).
-		Hour().
-		StartAt(nextSchedule)
-
 	grpcConn, err := grpc.Dial(config.DatabaseService, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -74,7 +66,6 @@ func NewService() *service.Service {
 		JWTSecret:              []byte(config.JWTSecret),
 		ImageProcessingService: client,
 		Pagination:             paginate.New(),
-		Cron:                   cron,
 		DatabaseService:        databaseClient,
 		RabbitMQ:               rabbitmq,
 		S3Client:               s3Client,

@@ -88,3 +88,29 @@ func (s GRPCServer) VerifyUser(_ context.Context, request *proto.UserRequest) (*
 	}
 	return nil, errors.ErrIncorrectRequest
 }
+
+func (s GRPCServer) GetEmailsForNotification(_ context.Context, request *proto.GetEmailsForNotificationRequest) (*proto.EmailsResponse, error) {
+	var users []schema.User
+	dayOfMonth := request.Day
+	hour := request.Hour
+
+	if err := s.DB.Model(&schema.User{}).
+		Preload("Settings").
+		Joins("inner join user_settings on user_settings.user_id = users.id").
+		Where("users.verified_at IS NOT NULL").
+		Where("user_settings.notification_day_of_month = ?", dayOfMonth).
+		Where("user_settings.notification_hour = ?", hour).
+		Find(&users).Error; err != nil {
+		return nil, errors.ErrNotFoundUser
+	}
+
+	var emails []string
+
+	for _, user := range users {
+		emails = append(emails, user.Email)
+	}
+
+	return &proto.EmailsResponse{
+		Emails: emails,
+	}, nil
+}

@@ -5,7 +5,6 @@ import (
 	"backend/internal/util"
 	"context"
 	"errors"
-	"github.com/go-co-op/gocron"
 	"github.com/minio/minio-go/v7"
 	"github.com/morkid/paginate"
 	"github.com/streadway/amqp"
@@ -19,7 +18,6 @@ type Service struct {
 	JWTSecret              []byte
 	ImageProcessingService proto.ImageProcessingServiceClient
 	Pagination             *paginate.Pagination
-	Cron                   *gocron.Scheduler
 	DatabaseService        proto.DatabaseServiceClient
 	RabbitMQ               *amqp.Connection
 	S3Client               *minio.Client
@@ -31,11 +29,6 @@ func (s *Service) Start() error {
 			panic(err)
 		}
 	}()
-
-	if _, err := s.Cron.Do(s.NotifyUsers); err != nil {
-		return err
-	}
-	s.Cron.StartAsync()
 	return nil
 }
 
@@ -46,5 +39,4 @@ func (s *Service) Shutdown(ctx context.Context) {
 	if err := s.Router.Shutdown(ctx); err != nil {
 		log.Printf("Web server shutdown with err: %v", err)
 	}
-	s.Cron.Stop()
 }
