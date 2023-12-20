@@ -245,3 +245,38 @@ func (s *Service) sendRequestVerification(user *proto.UserResponse) error {
 		})
 	}
 }
+
+func (s *Service) GetSettingsHandler(c *gin.Context) {
+	user := c.MustGet("user").(*proto.UserResponse)
+	if settings, err := s.DatabaseService.GetSettings(c, &proto.UserRequest{Id: &user.Id}); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+	} else {
+		c.JSON(http.StatusOK, settings)
+	}
+}
+
+func (s *Service) SetNotificationHandler(c *gin.Context) {
+	var form dto.SetNotificationTimeForm
+	if err := c.ShouldBindQuery(&form); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		return
+	} else if err := form.Validate(dto.ValidateArgs{Ctx: c}); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		return
+	}
+
+	user := c.MustGet("user").(*proto.UserResponse)
+
+	_, err := s.DatabaseService.UpdateSettings(c, &proto.UpdateSettingsRequest{
+		Id: user.Id,
+		Settings: &proto.Settings{
+			NotificationHour:       &form.Hour,
+			NotificationDayOfMonth: &form.Day,
+		},
+	})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+	} else {
+		c.Status(http.StatusOK)
+	}
+}

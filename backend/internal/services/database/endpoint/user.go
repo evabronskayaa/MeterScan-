@@ -25,7 +25,7 @@ func getUser(db *gorm.DB, query string, args ...interface{}) (*schema.User, erro
 	return user, nil
 }
 
-func (s GRPCServer) GetUser(_ context.Context, request *proto.UserRequest) (*proto.UserResponse, error) {
+func getUserByRequest(db *gorm.DB, request *proto.UserRequest) (*schema.User, error) {
 	if request.Id == nil && request.Email == nil {
 		return nil, errors.ErrIncorrectRequest
 	}
@@ -36,7 +36,12 @@ func (s GRPCServer) GetUser(_ context.Context, request *proto.UserRequest) (*pro
 		query = "email = ?"
 		arg = request.Email
 	}
-	if user, err := getUser(s.DB, query, arg); err != nil {
+
+	return getUser(db, query, arg)
+}
+
+func (s GRPCServer) GetUser(_ context.Context, request *proto.UserRequest) (*proto.UserResponse, error) {
+	if user, err := getUserByRequest(s.DB, request); err != nil {
 		return nil, err
 	} else {
 		return user.Proto(), nil
@@ -113,4 +118,31 @@ func (s GRPCServer) GetEmailsForNotification(_ context.Context, request *proto.G
 	return &proto.EmailsResponse{
 		Emails: emails,
 	}, nil
+}
+
+func (s GRPCServer) GetSettings(_ context.Context, request *proto.UserRequest) (*proto.Settings, error) {
+	if user, err := getUserByRequest(s.DB, request); err != nil {
+		return nil, err
+	} else {
+		return user.Settings.Proto(), nil
+	}
+}
+
+func (s GRPCServer) UpdateSettings(_ context.Context, request *proto.UpdateSettingsRequest) (*proto.Empty, error) {
+	if user, err := getUser(s.DB, "id = ?", request.Id); err != nil {
+		return nil, err
+	} else {
+		update := s.DB.Model(&user.Settings)
+		settings := request.Settings
+		if settings.NotificationDayOfMonth != nil {
+			update = update.Update("notification_day_of_month", settings.NotificationDayOfMonth)
+		}
+		if settings.NotificationHour != nil {
+			update = update.Update("notification_hour", settings.NotificationHour)
+		}
+		if err := update.Error; err != nil {
+			return nil, err
+		}
+	}
+	return &proto.Empty{}, nil
 }

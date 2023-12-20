@@ -14,6 +14,18 @@ service DatabaseService {
   rpc AddPrediction(AddPredictionRequest) returns (Prediction);
   rpc UpdateFullPrediction(UpdateFullPredictionRequest) returns (Empty);
   rpc GetEmailsForNotification(GetEmailsForNotificationRequest) returns (EmailsResponse);
+  rpc GetSettings(UserRequest) returns (Settings);
+  rpc UpdateSettings(UpdateSettingsRequest) returns (Empty);
+}
+
+message UpdateSettingsRequest {
+  uint64 id = 1;
+  Settings settings = 2;
+}
+
+message Settings {
+  optional uint32 notification_day_of_month = 1;
+  optional uint32 notification_hour = 2;
 }
 
 message GetEmailsForNotificationRequest {

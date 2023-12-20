@@ -52,13 +52,22 @@ func ConfigureRouter(s *service.Service, port int) *http.Server {
 	{
 		authorized.POST("/verify", endpointSever.RequestVerifyHandler)
 
-		verified := authorized.Use(middlewareServer.VerifyMiddleware())
+		verified := authorized.Group("", middlewareServer.VerifyMiddleware())
 		{
 			verified.GET("media/:dir/*asset", endpointSever.MediaHandler)
 
-			verified.GET("/predictions", endpointSever.GetPredictionsHandler)
-			verified.POST("/predictions", endpointSever.PredictHandler)
-			verified.PUT("/predictions", endpointSever.UpdatePredictHandler)
+			predictions := verified.Group("/predictions")
+			{
+				predictions.GET("", endpointSever.GetPredictionsHandler)
+				predictions.POST("", endpointSever.PredictHandler)
+				predictions.PUT("", endpointSever.UpdatePredictHandler)
+			}
+
+			settings := verified.Group("/settings")
+			{
+				settings.GET("", endpointSever.GetSettingsHandler)
+				settings.PUT("/notification", endpointSever.SetNotificationHandler)
+			}
 		}
 	}
 

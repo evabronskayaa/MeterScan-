@@ -10,6 +10,8 @@ import (
 const (
 	ErrInvalidEmail  errors.SimpleError = "Некорректная почта"
 	ErrShortPassword errors.SimpleError = "Пароль должен содержать не менее 6 символов"
+	ErrDayIncorrect  errors.SimpleError = "День должен быть в диапазоне от 1 до 28"
+	ErrHourIncorrect errors.SimpleError = "Час должен быть в диапазоне от 0 до 23"
 )
 
 type ValidatableForm interface {
@@ -77,4 +79,18 @@ type VerifyTokenForm struct {
 type UpdatePredictionForm struct {
 	ID            uint64 `json:"id" binding:"required"`
 	MeterReadings string `json:"meter_readings" binding:"required"`
+}
+
+type SetNotificationTimeForm struct {
+	Day  uint32 `json:"day" binding:"required"`
+	Hour uint32 `json:"hour" binding:"required"`
+}
+
+func (f SetNotificationTimeForm) Validate(args ValidateArgs) error {
+	if f.Day < 1 || f.Day > 28 {
+		return ErrDayIncorrect
+	} else if f.Hour < 0 || f.Hour > 23 {
+		return ErrHourIncorrect
+	}
+	return nil
 }
