@@ -1,6 +1,6 @@
 import ImportPicture from "../../components/ImportPicture/ImportPicture";
 import { stages } from "../../stages";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -26,6 +26,61 @@ const MainPage = (props) => {
     setValue(updatedValue);
     console.log(value);
   };
+
+  const applyRectangles = useCallback(
+    (img, rectangles) => {
+      console.log("apply");
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const image = new Image();
+      image.src = URL.createObjectURL(img);
+      console.log(img);
+
+      image.onload = () => {
+        console.log("onload");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0);
+
+        context.strokeStyle = "lime";
+        context.lineWidth = 3;
+        rectangles.forEach((rect) => {
+          context.strokeRect(
+            rect.x1,
+            rect.y1,
+            rect.x2 - rect.x1,
+            rect.y2 - rect.y1
+          );
+        });
+
+        canvas.toBlob((blob) => {
+          const blobURL = blob;
+          setSelectedImage(blobURL);
+          console.log(selectedImage);
+        });
+      };
+    },
+    [selectedImage]
+  );
+
+  useEffect(() => {
+    if (selectedImage && stage === stages.send) {
+      console.log("useeffect");
+      console.log(selectedImage);
+      applyRectangles(
+        selectedImage,
+        value[0].results.map((result) => {
+          return {
+            x1: result.scope.x1,
+            y1: result.scope.y1,
+            x2: result.scope.x2,
+            y2: result.scope.y2,
+          };
+        })
+      );
+      console.log(typeof selectedImage);
+    }
+  }, [selectedImage, stage, value, applyRectangles]);
 
   if (selectedImage && stage === stages.upload) changeStage(stages.analyze);
 
@@ -124,7 +179,7 @@ const MainPage = (props) => {
         <div className="form">
           <p className="title">передача показаний</p>
           <img
-            className="image"
+            className="image image-carousel"
             src={URL.createObjectURL(selectedImage)}
             alt="pic lost"
           />
