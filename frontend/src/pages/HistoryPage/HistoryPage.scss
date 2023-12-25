@@ -1,0 +1,30 @@
+main {
+    display: flex !important;
+    flex-wrap: wrap;
+    flex-direction: column!important;;
+    justify-content: center;
+    align-items: center;
+}
+
+.title{
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.value-row{
+    display: flex !important;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 700px;
+    border: 1px solid rgba(0, 0, 0, 1) !important;
+    padding: 20px 30px;
+    margin-bottom: 10px;
+    border-radius: 0.25rem;
+}
+
+.value-row-container{
+    margin-right: 10px;
+    text-transform: uppercase;
+}
