@@ -1,6 +1,6 @@
 import ImportPicture from "../../components/ImportPicture/ImportPicture";
 import { stages } from "../../stages";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -17,9 +17,71 @@ const MainPage = () => {
   const user = authService.getCurrentUser();
 
   const handleLogout = (e) => {
-    authService.logout()
+    authService.logout();
     window.location.reload();
   };
+
+  const handleConfirmation = (index, newValue) => {
+    const updatedValue = [...value];
+    updatedValue[0].results[index].valid_meter_readings = newValue;
+    setValue(updatedValue);
+    console.log(value);
+  };
+
+  const applyRectangles = useCallback(
+    (img, rectangles) => {
+      console.log("apply");
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const image = new Image();
+      image.src = URL.createObjectURL(img);
+      console.log(img);
+
+      image.onload = () => {
+        console.log("onload");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0);
+
+        context.strokeStyle = "lime";
+        context.lineWidth = 3;
+        rectangles.forEach((rect) => {
+          context.strokeRect(
+            rect.x1,
+            rect.y1,
+            rect.x2 - rect.x1,
+            rect.y2 - rect.y1
+          );
+        });
+
+        canvas.toBlob((blob) => {
+          const blobURL = blob;
+          setSelectedImage(blobURL);
+          console.log(selectedImage);
+        });
+      };
+    },
+    [selectedImage]
+  );
+
+  useEffect(() => {
+    if (selectedImage && stage === stages.send) {
+      console.log("useeffect");
+      console.log(selectedImage);
+      applyRectangles(
+        selectedImage,
+        value[0].results.map((result) => {
+          return {
+            x1: result.scope.x1,
+            y1: result.scope.y1,
+            x2: result.scope.x2,
+            y2: result.scope.y2,
+          };
+        })
+      );
+      console.log(typeof selectedImage);
+    }
+  }, [selectedImage, stage, value, applyRectangles]);
 
   if (selectedImage && stage === stages.upload) changeStage(stages.analyze);
 
@@ -85,9 +147,9 @@ const MainPage = () => {
           <button
             className="basic-button black-button"
             onClick={() => {
-              MLService.predict(selectedImage).then(r => {
-                  changeStage(stages.send);
-                  setValue(r);
+              MLService.predict(selectedImage).then((r) => {
+                changeStage(stages.send);
+                setValue(r);
               });
             }}
           >
@@ -118,32 +180,48 @@ const MainPage = () => {
         <div className="form">
           <p className="title">передача показаний</p>
           <img
-            className="image"
+            className="image image-carousel"
             src={URL.createObjectURL(selectedImage)}
             alt="pic lost"
           />
-          {typeof value === "object" ? (
-            <>
-              <Slider className="carousel border" dots accessibility={false}>
-                {value.map((item, index) => (
-                  <div key={index} className="carousel-item">
-                    <TransmissionCard value={item} />
-                  </div>
-                ))}
-                <div className="carousel-item">
-                  <p>Если вы подтвердили все показания, то самое время</p>
-                  <button className="basic-button black-button">
-                    Передать показания
-                  </button>
-                </div>
-              </Slider>
-            </>
-          ) : (
-            <>
-              <TransmissionCard value={value} />
-            </>
-          )}
+
+          <Slider className="carousel border" dots accessibility={false}>
+            {value[0].results.map((item, index) => (
+              <div key={index} className="carousel-item">
+                <TransmissionCard
+                  onConfirmation={(newValue) =>
+                    handleConfirmation(index, newValue)
+                  }
+                  value={item.valid_meter_readings}
+                />
+              </div>
+            ))}
+            <div className="carousel-item">
+              <p>Если вы подтвердили все показания, то самое время</p>
+              <button
+                className="basic-button black-button"
+                onClick={() => {
+                  changeStage(stages.sent);
+                }}
+              >
+                Передать показания
+              </button>
+            </div>
+          </Slider>
         </div>
+      </>
+    );
+  else if (stage === stages.sent)
+    return (
+      <>
+        <p className="title main-title">MeterScan+</p>
+        <div className="user">
+          <span>{props.email}</span>
+          <button className="logout" onClick={handleLogout}>
+            Выйти
+          </button>
+        </div>
+        <p>Показания переданы!</p>
       </>
     );
   else return <p>Что-то не так...</p>;

@@ -1,5 +1,6 @@
 export const stages = {
     upload: "upload",
     analyze: "analyze",
-    send: "send"
+    send: "send",
+    sent: "sent"
 }
