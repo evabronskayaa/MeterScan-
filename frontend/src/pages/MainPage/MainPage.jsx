@@ -1,6 +1,7 @@
 import ImportPicture from "../../components/ImportPicture/ImportPicture";
 import { stages } from "../../stages";
 import { useState, useEffect, useCallback } from "react";
+import { NavLink } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -88,7 +89,9 @@ const MainPage = () => {
   if (stage === stages.upload)
     return (
       <>
-        <p className="title main-title">MeterScan+</p>
+        <NavLink to="/">
+          <p className="title main-title">MeterScan+</p>
+        </NavLink>
         <div className="user">
           <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
@@ -130,7 +133,9 @@ const MainPage = () => {
   else if (stage === stages.analyze)
     return (
       <>
-        <p className="title main-title">MeterScan+</p>
+        <NavLink to="/">
+          <p className="title main-title">MeterScan+</p>
+        </NavLink>
         <div className="user">
           <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
@@ -170,7 +175,9 @@ const MainPage = () => {
   else if (stage === stages.send)
     return (
       <>
-        <p className="title main-title">MeterScan+</p>
+        <NavLink to="/">
+          <p className="title main-title">MeterScan+</p>
+        </NavLink>
         <div className="user">
           <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
@@ -214,14 +221,17 @@ const MainPage = () => {
   else if (stage === stages.sent)
     return (
       <>
-        <p className="title main-title">MeterScan+</p>
+        <NavLink to="/">
+          <p className="title main-title">MeterScan+</p>
+        </NavLink>
         <div className="user">
-          <span>{props.email}</span>
+          <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
         </div>
         <p>Показания переданы!</p>
+        <NavLink to="/">Вернуться на главную</NavLink>
       </>
     );
   else return <p>Что-то не так...</p>;

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import AuthService from "../../services/auth.service";
-import LoginPage from "../LoginPage/LoginPage";
 import "../../styles/form.scss";
 import { isEmail } from "validator";
 import {NavLink} from "react-router-dom";
