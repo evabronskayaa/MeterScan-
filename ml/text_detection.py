@@ -1,11 +1,13 @@
-import os, glob
+import glob
+import os
+
 import cv2
 import numpy as np
-from PIL import Image
-
 import onnxruntime as ort
-
+from PIL import Image
 from paddleocr import PaddleOCR
+
+from proto import database_pb2
 
 detector_classes = ['water_meter_data']
 
@@ -20,8 +22,7 @@ def detect_objects_on_image(buf):
     return contours
 
 
-def prepare_input(buf):
-    img = Image.open(buf)
+def prepare_input(img):
     img_width, img_height = img.size
 
     img = img.resize((640, 640))
@@ -35,7 +36,7 @@ def prepare_input(buf):
 
 
 def run_model(input):
-    model = ort.InferenceSession("./models/water_meters_detector.onnx", providers=['CPUExecutionProvider'])
+    model = ort.InferenceSession("models/water_meters_detector.onnx", providers=['CPUExecutionProvider'])
     outputs = model.run(["output0"], {"images": input})
 
     return outputs[0]
@@ -96,16 +97,16 @@ def process_output(output, img_width, img_height):
 
 
 def crop_by_contours(img, contours):
-    img = cv2.imread(img)
+    img = np.array(img)
 
     for i, contour in enumerate(contours):
-        x1, y1, x2, y2 = map(float, contour[:4])
-        contour = np.array([(x1, y1), (x2, y2)], dtype=np.float32)
+        x1, y1, x2, y2 = map(int, contour[:4])
+        cv_contour = np.array([[x1, y1], [x2, y2]])
 
-        x, y, w, h = cv2.boundingRect(contour)
+        x, y, w, h = cv2.boundingRect(cv_contour)
         cropped = img[y - 10:y + h + 10, x - 10:x + w + 10]
 
-        cv2.imwrite(f"./images/{i}.jpg", cropped)
+        Image.fromarray(cropped).save(f"./images/{i}.jpg")
 
 
 def predict_text():
@@ -143,22 +144,26 @@ def process_ocr_result():
         if len(ocr_result[0]) > 1:
             conf = ocr_result[0][0][-1][-1]
             result = ocr_result[0][0][-1][-2]
-            results.append([result, conf])
         else:
             result = ocr_result[0][-1][-1][-2]
             conf = ocr_result[0][-1][-1][-1]
-            results.append([result, conf])
+        
+        results.append([result, conf])
+
     return results
 
 
 def concat_all_results(contours, ocr_result):
-    result = []
+    processed_results = []
 
-    for i in range(0, len(contours), 1):
-        box = np.array(contours[i][:4], dtype=np.int32).tolist()
-        text = ocr_result[i][0]
-        proba = ocr_result[i][1]
+    for idx, result in enumerate(ocr_result):
+        box = np.array(contours[idx][:4], dtype=np.int32).tolist()
+        text = result[0]
+        proba = result[1]
 
-        result.append([text, proba, box])
+        result = database_pb2.RecognitionResult(recognition=text[:5], metric=proba,
+                                             scope=database_pb2.Scope(x1=box[0], y1=box[1], x2=box[2], y2=box[3]))
 
-    return result
+        processed_results.append(result)
+
+    return processed_results

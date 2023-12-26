@@ -9,11 +9,12 @@ import "./MainPage.scss";
 import authService from "../../services/auth.service";
 import MLService from "../../services/ML.service";
 
-const MainPage = (props) => {
+const MainPage = () => {
   const [stage, changeStage] = useState(stages.upload);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState();
+  const user = authService.getCurrentUser();
 
   const handleLogout = (e) => {
     authService.logout();
@@ -89,7 +90,7 @@ const MainPage = (props) => {
       <>
         <p className="title main-title">MeterScan+</p>
         <div className="user">
-          <span>{props.email}</span>
+          <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
@@ -131,7 +132,7 @@ const MainPage = (props) => {
       <>
         <p className="title main-title">MeterScan+</p>
         <div className="user">
-          <span>{props.email}</span>
+          <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
@@ -171,7 +172,7 @@ const MainPage = (props) => {
       <>
         <p className="title main-title">MeterScan+</p>
         <div className="user">
-          <span>{props.email}</span>
+          <span>{user}</span>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
