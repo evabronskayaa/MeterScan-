@@ -11,7 +11,7 @@ const HistoryPage = ({ selectedImage, onUpload }) => {
           <button className="profile">Профиль</button>
         </div>
       </header>
-      <main>
+      <main className="profile-container">
         <div className="title">История показаний</div>
         <div className="value-row">
           <div className="value-row-container">л/с 4709040404</div>

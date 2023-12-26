@@ -14,6 +14,7 @@ import {
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import MainPage from "./pages/MainPage/MainPage";
 import MenuPage from "./pages/MenuPage/MenuPage";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import authService from "./services/auth.service";
 import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -65,6 +66,7 @@ const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Comp
     <Route path="/login" Component={LoginPage}/>
     <Route path="/recognize" Component={MainPage}/>
     <Route path="/history" Component={HistoryPage}/>
+    <Route path="/profile" Component={ProfilePage}/>
     <Route path="/" Component={MenuPage}/>
 </Route>))
 
