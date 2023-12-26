@@ -197,12 +197,30 @@ const MainPage = (props) => {
             ))}
             <div className="carousel-item">
               <p>Если вы подтвердили все показания, то самое время</p>
-              <button className="basic-button black-button">
+              <button
+                className="basic-button black-button"
+                onClick={() => {
+                  changeStage(stages.sent);
+                }}
+              >
                 Передать показания
               </button>
             </div>
           </Slider>
         </div>
+      </>
+    );
+  else if (stage === stages.sent)
+    return (
+      <>
+        <p className="title main-title">MeterScan+</p>
+        <div className="user">
+          <span>{props.email}</span>
+          <button className="logout" onClick={handleLogout}>
+            Выйти
+          </button>
+        </div>
+        <p>Показания переданы!</p>
       </>
     );
   else return <p>Что-то не так...</p>;
