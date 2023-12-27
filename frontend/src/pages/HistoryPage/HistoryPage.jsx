@@ -20,6 +20,9 @@ const HistoryPage = () => {
         {value.results?.map((result) => {
           return <div className="value-row-container">{result.recognition}</div>
         })}
+        {value.results && value.results.length === 1 && index > 0 && predictions[index - 1].results && predictions[index - 1].results.length == 1 &&
+            <div className="value-row-container">{"Разница по сравнению с предыдущим месяцем: " + (Number(value.results[0].recognition) - Number(predictions[index - 1].results[0].recognition))}</div>
+        }
       </div>
     })}
 
@@ -31,6 +34,18 @@ const HistoryPage = () => {
             type: 'scatter'
           },
         ]}
+        layout={{
+          xaxis: {
+            title: {
+              text: 'Дата',
+            },
+          },
+          yaxis: {
+            title: {
+              text: 'Кубы',
+            },
+          }
+        }}
     />
   </div>
 };
