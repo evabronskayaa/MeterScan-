@@ -93,7 +93,9 @@ const MainPage = () => {
           <p className="title main-title">MeterScan+</p>
         </NavLink>
         <div className="user">
-          <span>{user}</span>
+          <NavLink to="/profile">
+            <span>{user}</span>
+          </NavLink>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
@@ -137,7 +139,9 @@ const MainPage = () => {
           <p className="title main-title">MeterScan+</p>
         </NavLink>
         <div className="user">
-          <span>{user}</span>
+          <NavLink to="/profile">
+            <span>{user}</span>
+          </NavLink>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
@@ -179,7 +183,9 @@ const MainPage = () => {
           <p className="title main-title">MeterScan+</p>
         </NavLink>
         <div className="user">
-          <span>{user}</span>
+          <NavLink to="/profile">
+            <span>{user}</span>
+          </NavLink>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>
@@ -225,7 +231,9 @@ const MainPage = () => {
           <p className="title main-title">MeterScan+</p>
         </NavLink>
         <div className="user">
-          <span>{user}</span>
+          <NavLink to="/profile">
+            <span>{user}</span>
+          </NavLink>
           <button className="logout" onClick={handleLogout}>
             Выйти
           </button>

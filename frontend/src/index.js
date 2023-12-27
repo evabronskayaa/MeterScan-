@@ -38,15 +38,15 @@ const AuthRedirector = ({children}) => {
     const location = useLocation()
     const path = location.pathname
 
-    // if (!user) {
-    //     if (!pagesWithNoAuth.includes(path)) {
-    //         return <Navigate to='/login' state={{from: location}} replace/>
-    //     }
-    // } else if (pagesWithNoAuth.includes(path)) {
-    //     if (location.state?.from)
-    //         return <Navigate to={ location.state.from } replace/>
-    //     return <Navigate to="/" replace/>
-    // }
+    if (!user) {
+        if (!pagesWithNoAuth.includes(path)) {
+            return <Navigate to='/login' state={{from: location}} replace/>
+        }
+    } else if (pagesWithNoAuth.includes(path)) {
+        if (location.state?.from)
+            return <Navigate to={ location.state.from } replace/>
+        return <Navigate to="/" replace/>
+    }
 
     return children
 }

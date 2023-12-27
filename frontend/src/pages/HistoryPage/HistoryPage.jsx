@@ -1,14 +1,19 @@
 import React from "react";
 import "./HistoryPage.scss";
+import { NavLink } from "react-router-dom";
 
 const HistoryPage = ({ selectedImage, onUpload }) => {
   return (
     <>
       <header style={{ display: "flex" }}>
-        <div className="logo">MeterScan+</div>
+        <NavLink to="/">
+          <div className="logo">MeterScan+</div>
+        </NavLink>
         <div className="header-right-container">
           <div className="address">Курчатова 30, 78</div>
-          <button className="profile">Профиль</button>
+          <NavLink to="/profile">
+            <button className="profile">Профиль</button>
+          </NavLink>
         </div>
       </header>
       <main className="profile-container">
