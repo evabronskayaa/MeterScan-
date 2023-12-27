@@ -3,6 +3,7 @@ package schema
 import (
 	"backend/internal/proto"
 	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type Prediction struct {
@@ -11,6 +12,8 @@ type Prediction struct {
 	ImageName pgtype.UUID `gorm:"type:uuid;default:uuid_generate_v4();unique" json:"image_name"`
 
 	PredictionInfos []PredictionInfo `gorm:"foreignKey:PredictionID" json:"results"`
+
+	CreatedAt time.Time `json:"-"`
 }
 
 type PredictionInfo struct {
@@ -52,9 +55,11 @@ func (p *Prediction) Proto() *proto.Prediction {
 	for _, value := range p.PredictionInfos {
 		results = append(results, value.Proto())
 	}
+	createAt := p.CreatedAt.Unix()
 	return &proto.Prediction{
 		Id:        p.ID,
 		ImageName: imageName,
 		Results:   results,
+		CreatedAt: &createAt,
 	}
 }

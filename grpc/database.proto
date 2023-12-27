@@ -62,6 +62,7 @@ message Prediction {
   uint64 id = 1;
   string image_name = 2;
   repeated RecognitionResult results = 3;
+  optional int64 created_at = 4;
 }
 
 message UpdatePredictionRequest {

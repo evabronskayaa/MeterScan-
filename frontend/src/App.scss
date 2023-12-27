@@ -3,4 +3,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &:not(:-webkit-full-screen) {
+    margin-top: 100px;
+    overflow-y: scroll;
+    align-items: flex-start;
+  }
 }

@@ -1,22 +1,26 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./HistoryPage.scss";
+import MLService from "../../services/ML.service";
 
 const HistoryPage = () => {
-  return <div className="profile-container">
-    <div className="title">История показаний</div>
-    <div className="value-row">
-      <div className="value-row-container">л/с 4709040404</div>
-      <div className="value-row-container">23-12-2023</div>
-      <div className="value-row-container">горячая вода</div>
-      <div className="value-row-container">26 куб</div>
-    </div>
+  const [predictions, setPredictions] = useState([])
 
-    <div className="value-row">
-      <div className="value-row-container">л/с 4709040404</div>
-      <div className="value-row-container">23-12-2023</div>
-      <div className="value-row-container">горячая вода</div>
-      <div className="value-row-container">26 куб</div>
-    </div>
+  useEffect(() => {
+    MLService.getPredictions().then(setPredictions)
+  }, [])
+
+  return <div>
+    <div className="title">История показаний</div>
+
+    {predictions.map((value, index) => {
+      return <div key={index} className="value-row">
+        <div className="value-row-container">{new Date(value.created_at * 1000).toLocaleString()}</div>
+        {value.results && <div className="value-row-container">Показания:</div>}
+        {value.results?.map((result) => {
+          return <div className="value-row-container">{result.recognition}</div>
+        })}
+      </div>
+    })}
   </div>
 };
 

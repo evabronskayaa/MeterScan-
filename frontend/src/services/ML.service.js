@@ -33,6 +33,12 @@ class MLService {
     })
   }
 
+  static async getPredictions() {
+    return await axios.get(API_URL + "predictions", {
+      headers: authHeader()
+    }).then(r => r.data)
+  }
+
   //TODO
   static async transmitData(data){
     
