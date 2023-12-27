@@ -29,20 +29,24 @@ const RecognizePage = () => {
 
         context.strokeStyle = "lime";
         context.lineWidth = 3;
-        rectangles.forEach((rect) => {
+        rectangles.forEach((rect,index) => {
           context.strokeRect(
             rect.x1,
             rect.y1,
             rect.x2 - rect.x1,
             rect.y2 - rect.y1
           );
+          context.fillStyle = "lime";
+        context.strokeStyle = "lime";
+        context.font = "30pt Arial";
+        context.fillText(`${index + 1}`, rect.x1, rect.y1 - 5);
         });
 
         canvas.toBlob((blob) => {
           setSelectedImage(blob);
         });
       };
-    }, [selectedImage]
+    }, []
   );
 
   useEffect(() => {
