@@ -31,7 +31,7 @@ func ConfigureRouter(s *service.Service, port int) *http.Server {
 
 	router.RedirectTrailingSlash = true
 	router.Use(cors.New(cors.Config{
-		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
@@ -61,6 +61,7 @@ func ConfigureRouter(s *service.Service, port int) *http.Server {
 				predictions.GET("", endpointSever.GetPredictionsHandler)
 				predictions.POST("", endpointSever.PredictHandler)
 				predictions.PUT("", endpointSever.UpdatePredictHandler)
+				predictions.DELETE("", endpointSever.RemovePredictHandler)
 			}
 
 			settings := verified.Group("/settings")

@@ -160,6 +160,22 @@ func (s *Service) UpdatePredictHandler(c *gin.Context) {
 	}
 }
 
+func (s *Service) RemovePredictHandler(c *gin.Context) {
+	var form dto.PredictionForm
+	if err := c.ShouldBind(&form); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		return
+	}
+
+	user := c.MustGet("user").(*proto.UserResponse)
+
+	if _, err := s.DatabaseService.RemovePredictionInfo(c, &proto.RemovePredictionInfoRequest{Id: form.ID, UserId: user.Id}); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+	} else {
+		c.Status(http.StatusOK)
+	}
+}
+
 // GetPredictionsHandler godoc
 //
 //	@Summary		Достать показания пользователя

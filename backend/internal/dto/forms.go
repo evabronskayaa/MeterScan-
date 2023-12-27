@@ -76,8 +76,12 @@ type VerifyTokenForm struct {
 	Token string `form:"token"`
 }
 
+type PredictionForm struct {
+	ID uint64 `json:"id" form:"id" binding:"required"`
+}
+
 type UpdatePredictionForm struct {
-	ID            uint64 `json:"id" form:"id" binding:"required"`
+	PredictionForm
 	MeterReadings string `json:"meter_readings" form:"meter_readings" binding:"required"`
 }
 

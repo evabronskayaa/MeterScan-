@@ -1,7 +1,7 @@
 import ImportPicture from "../../components/ImportPicture/ImportPicture";
-import { stages } from "../../stages";
-import { useState, useEffect, useCallback } from "react";
-import { NavLink } from "react-router-dom";
+import {stages} from "../../stages";
+import {useCallback, useEffect, useState} from "react";
+import {NavLink} from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -12,11 +12,18 @@ import MLService from "../../services/ML.service";
 const RecognizePage = () => {
   const [stage, changeStage] = useState(stages.upload);
   const [selectedImage, setSelectedImage] = useState(null);
+    const [imageWithScope, setImageWithScope] = useState(null)
   const [showModal, setShowModal] = useState(false);
-  const [value, setValue] = useState();
+    const [value, setValue] = useState([]);
 
-  const applyRectangles = useCallback(
-    (img, rectangles) => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const handleBeforeChange = (oldIndex, newIndex) => {
+        setImageWithScope(null);
+        setCurrentSlide(newIndex);
+    };
+
+    const applyRectangles = useCallback((img, rectangle) => {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       const image = new Image();
@@ -29,41 +36,22 @@ const RecognizePage = () => {
 
         context.strokeStyle = "lime";
         context.lineWidth = 3;
-        rectangles.forEach((rect,index) => {
-          context.strokeRect(
-            rect.x1,
-            rect.y1,
-            rect.x2 - rect.x1,
-            rect.y2 - rect.y1
-          );
+          context.strokeRect(rectangle.x1, rectangle.y1, rectangle.x2 - rectangle.x1, rectangle.y2 - rectangle.y1);
           context.fillStyle = "lime";
-        context.strokeStyle = "lime";
-        context.font = "30pt Arial";
-        context.fillText(`${index + 1}`, rect.x1, rect.y1 - 5);
-        });
 
         canvas.toBlob((blob) => {
-          setSelectedImage(blob);
+            setImageWithScope(blob);
         });
       };
     }, []
   );
 
   useEffect(() => {
-    if (selectedImage && stage === stages.send) {
-      applyRectangles(
-        selectedImage,
-        value.map((result) => {
-          return {
-            x1: result.scope.x1,
-            y1: result.scope.y1,
-            x2: result.scope.x2,
-            y2: result.scope.y2,
-          };
-        })
+    if (selectedImage && stage === stages.send && value[currentSlide]?.scope) {
+      applyRectangles(selectedImage, value[currentSlide].scope
       );
     }
-  }, [selectedImage, stage, value, applyRectangles]);
+  }, [selectedImage, stage, value, applyRectangles, currentSlide]);
 
   if (selectedImage && stage === stages.upload) changeStage(stages.analyze);
 
@@ -142,14 +130,23 @@ const RecognizePage = () => {
           <p className="title">передача показаний</p>
           <img
             className="image image-carousel"
-            src={URL.createObjectURL(selectedImage)}
+            src={URL.createObjectURL(imageWithScope !== null ? imageWithScope : selectedImage)}
             alt="pic lost"
           />
 
-          <Slider className="carousel border" dots accessibility={false}>
+            <Slider className="carousel border" dots accessibility={false} beforeChange={handleBeforeChange}>
             {value.map((item, index) => (
               <div key={index} className="carousel-item">
-                <TransmissionCard value={item}/>
+                  <TransmissionCard value={item} onRemove={() => {
+                      setImageWithScope(null)
+                      const newValue = value.filter(value => value.id !== item.id)
+                      setValue(newValue)
+                      if (newValue.length === 0) {
+                          changeStage(stages.upload)
+                          setSelectedImage(null)
+                          setValue(null)
+                      }
+                  }}/>
               </div>
             ))}
             <div className="carousel-item">

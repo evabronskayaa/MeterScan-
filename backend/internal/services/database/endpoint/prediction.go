@@ -5,12 +5,27 @@ import (
 	"backend/internal/proto"
 	"backend/internal/services/database/schema"
 	"context"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
-func (s GRPCServer) GetPredictions(ctx context.Context, request *proto.GetPredictionsRequest) (*proto.GetPredictionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPredictions not implemented")
+func (s GRPCServer) GetPredictions(_ context.Context, request *proto.GetPredictionsRequest) (*proto.GetPredictionsResponse, error) {
+	var predictions []schema.Prediction
+
+	result := s.DB.Preload("PredictionInfos").Where("user_id = ?", request.Id).Find(&predictions)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var protoPredictions []*proto.Prediction
+	for _, prediction := range predictions {
+		protoPrediction := prediction.Proto()
+		protoPredictions = append(protoPredictions, protoPrediction)
+	}
+
+	response := &proto.GetPredictionsResponse{
+		Predictions: protoPredictions,
+	}
+
+	return response, nil
 }
 
 func (s GRPCServer) UpdatePrediction(ctx context.Context, request *proto.UpdatePredictionRequest) (*proto.Empty, error) {
@@ -89,4 +104,28 @@ func (s GRPCServer) GetPrediction(_ context.Context, request *proto.GetPredictio
 		return nil, errors.ErrNotFoundPrediction
 	}
 	return prediction.Proto(), nil
+}
+
+func (s GRPCServer) RemovePredictionInfo(_ context.Context, request *proto.RemovePredictionInfoRequest) (*proto.Empty, error) {
+	var predictionInfo *schema.PredictionInfo
+	if s.DB.Where("id = ?", request.Id).First(&predictionInfo).Error != nil {
+		return nil, errors.ErrNotFoundPrediction
+	}
+
+	var prediction *schema.Prediction
+	if s.DB.Preload("PredictionInfos").Where("id = ?", predictionInfo.PredictionID).First(&prediction).Error != nil || prediction.UserID != request.UserId {
+		return nil, errors.ErrNotFoundPrediction
+	}
+
+	if s.DB.Delete(predictionInfo).Error != nil {
+		return nil, errors.ErrSavePrediction
+	}
+
+	if len(prediction.PredictionInfos) <= 1 {
+		if s.DB.Delete(prediction).Error != nil {
+			return nil, errors.ErrSavePrediction
+		}
+	}
+
+	return &proto.Empty{}, nil
 }

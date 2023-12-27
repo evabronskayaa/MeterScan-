@@ -27,6 +27,12 @@ class MLService {
     })
   }
 
+  static async removePredict(id) {
+    await axios.delete(API_URL + `predictions?id=${id}`, {
+      headers: authHeader(),
+    })
+  }
+
   //TODO
   static async transmitData(data){
     
