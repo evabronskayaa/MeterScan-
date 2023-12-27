@@ -3,66 +3,15 @@ import './index.css';
 import ReactDOM from 'react-dom/client'
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
-import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    Navigate,
-    Outlet,
-    Route,
-    RouterProvider,
-    ScrollRestoration,
-    useLocation
-} from "react-router-dom";
+import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import MenuPage from "./pages/MenuPage/MenuPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
-import authService from "./services/auth.service";
 import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import MainLayout from "./components/MainLayout/MainLayout";
 import RecognizePage from "./pages/RecognizePage/RecognizePage";
-
-export const RemoveTrailingSlash = ({ ...rest }) => {
-    const location = useLocation()
-
-    // If the last character of the url is '/'
-    if (location.pathname.match('/.*/$')) {
-        return <Navigate replace { ...rest } to={ {
-            pathname: location.pathname.replace(/\/+$/, ''),
-            search: location.search
-        } }/>
-    } else return null
-}
-
-const pagesWithNoAuth = ['/login', '/register']
-
-const AuthRedirector = ({children}) => {
-    const user = authService.getCurrentUser()
-    const location = useLocation()
-    const path = location.pathname
-
-    if (!user) {
-        if (!pagesWithNoAuth.includes(path)) {
-            return <Navigate to='/login' state={{from: location}} replace/>
-        }
-    } else if (pagesWithNoAuth.includes(path) || (!user.verified && path !== '/')) {
-        if (location.state?.from)
-            return <Navigate to={location.state.from} replace/>
-        return <Navigate to="/" replace/>
-    }
-
-    return children
-}
-
-const Root = () => {
-    return <>
-        <RemoveTrailingSlash/>
-        <AuthRedirector>
-            <Outlet/>
-        </AuthRedirector>
-        <ScrollRestoration/>
-    </>
-}
+import Root from "./common/Root";
 
 const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
     <Route path="/register" Component={RegisterPage}/>

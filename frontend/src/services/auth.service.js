@@ -1,4 +1,5 @@
 import axios from "axios";
+import authHeader from "./auth-header";
 
 const API_URL = "http://localhost/api/v1/";
 
@@ -31,6 +32,22 @@ class AuthService {
       password,
       recaptcha
     });
+  }
+
+  me() {
+    if (authService.getCurrentUser()) {
+      axios.get(API_URL + "me", {
+        headers: authHeader(),
+      }).then(response => {
+        return response.data;
+      }).then(data => {
+        const localStorageItem = JSON.parse(localStorage.getItem("user"))
+        localStorageItem.user = data
+        localStorage.setItem("user", JSON.stringify(localStorageItem));
+      }).catch(() => {
+        authService.logout()
+      })
+    }
   }
 
   getCurrentUser() {

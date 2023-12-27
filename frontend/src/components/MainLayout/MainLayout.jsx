@@ -24,6 +24,9 @@ const MainLayout = () => {
             </div>
         </div>
         <div>
+            { !user.verified &&
+                <p>Подтверди аккаунт...</p>
+            }
             <Outlet/>
         </div>
     </div>
