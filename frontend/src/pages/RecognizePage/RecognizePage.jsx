@@ -15,24 +15,14 @@ const RecognizePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState();
 
-  const handleConfirmation = (index, newValue) => {
-    const updatedValue = [...value];
-    updatedValue[0].results[index].valid_meter_readings = newValue;
-    setValue(updatedValue);
-    console.log(value);
-  };
-
   const applyRectangles = useCallback(
     (img, rectangles) => {
-      console.log("apply");
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       const image = new Image();
-      image.src = URL.createObjectURL(img);
-      console.log(img);
+      image.src = URL.createObjectURL(img)
 
       image.onload = () => {
-        console.log("onload");
         canvas.width = image.width;
         canvas.height = image.height;
         context.drawImage(image, 0, 0);
@@ -49,22 +39,17 @@ const RecognizePage = () => {
         });
 
         canvas.toBlob((blob) => {
-          const blobURL = blob;
-          setSelectedImage(blobURL);
-          console.log(selectedImage);
+          setSelectedImage(blob);
         });
       };
-    },
-    [selectedImage]
+    }, [selectedImage]
   );
 
   useEffect(() => {
     if (selectedImage && stage === stages.send) {
-      console.log("useeffect");
-      console.log(selectedImage);
       applyRectangles(
         selectedImage,
-        value[0].results.map((result) => {
+        value.map((result) => {
           return {
             x1: result.scope.x1,
             y1: result.scope.y1,
@@ -73,7 +58,6 @@ const RecognizePage = () => {
           };
         })
       );
-      console.log(typeof selectedImage);
     }
   }, [selectedImage, stage, value, applyRectangles]);
 
@@ -159,14 +143,9 @@ const RecognizePage = () => {
           />
 
           <Slider className="carousel border" dots accessibility={false}>
-            {value[0].results.map((item, index) => (
+            {value.map((item, index) => (
               <div key={index} className="carousel-item">
-                <TransmissionCard
-                  onConfirmation={(newValue) =>
-                    handleConfirmation(index, newValue)
-                  }
-                  value={item.valid_meter_readings}
-                />
+                <TransmissionCard value={item}/>
               </div>
             ))}
             <div className="carousel-item">

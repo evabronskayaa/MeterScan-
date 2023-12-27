@@ -77,13 +77,13 @@ type VerifyTokenForm struct {
 }
 
 type UpdatePredictionForm struct {
-	ID            uint64 `json:"id" binding:"required"`
-	MeterReadings string `json:"meter_readings" binding:"required"`
+	ID            uint64 `json:"id" form:"id" binding:"required"`
+	MeterReadings string `json:"meter_readings" form:"meter_readings" binding:"required"`
 }
 
 type SetNotificationTimeForm struct {
-	Day  uint32 `json:"day" binding:"required"`
-	Hour uint32 `json:"hour" binding:"required"`
+	Day  uint32 `json:"day" form:"id" binding:"required"`
+	Hour uint32 `json:"hour" form:"meter_readings" binding:"required"`
 }
 
 func (f SetNotificationTimeForm) Validate(args ValidateArgs) error {

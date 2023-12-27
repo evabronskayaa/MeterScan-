@@ -14,8 +14,17 @@ class MLService {
       })
     ).data;
 
+    return response[0]["results"];
+  }
 
-    return response[0]["results"].map(item => item.recognition);
+  static async updatePredict(id, meter_readings) {
+    const form = new FormData();
+    form.append("id", id)
+    form.append("meter_readings", meter_readings)
+
+    await axios.put(API_URL + "predictions", form, {
+      headers: authHeader(),
+    })
   }
 
   //TODO

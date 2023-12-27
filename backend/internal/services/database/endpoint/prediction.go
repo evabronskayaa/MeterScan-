@@ -14,10 +14,14 @@ func (s GRPCServer) GetPredictions(ctx context.Context, request *proto.GetPredic
 }
 
 func (s GRPCServer) UpdatePrediction(ctx context.Context, request *proto.UpdatePredictionRequest) (*proto.Empty, error) {
-	if err := s.DB.Model(&schema.PredictionInfo{}).
-		Joins("JOIN predictions ON predictions.id = prediction_infos.prediction_id").
-		Where("prediction_infos.id = ? AND predictions.user_id = ?", request.Id, request.UserId).
-		Update("valid_meter_readings", request.ValidMeterReadings).Error; err != nil {
+	if err := s.DB.Exec(`
+    UPDATE prediction_infos 
+    SET valid_meter_readings = ? 
+    FROM predictions 
+    WHERE prediction_infos.id = ? 
+      AND prediction_infos.prediction_id = predictions.id 
+      AND predictions.user_id = ?`,
+		request.ValidMeterReadings, request.Id, request.UserId).Error; err != nil {
 		return nil, err
 	}
 

@@ -1,8 +1,10 @@
 import "./transmissionCard.scss";
 import { useState } from "react";
+import MLService from "../../services/ML.service";
 
 const TransmissionCard = (props) => {
-  const [value, setValue] = useState(props.value);
+  const prediction = props.value
+  const [value, setValue] = useState(prediction.recognition);
   const [clicked, setClick] = useState(true);
 
   const handleChange = (e) => {
@@ -10,11 +12,17 @@ const TransmissionCard = (props) => {
       const input = e.target.textContent;
       if (!isNaN(input)) {
         setValue(input);
-        props.onConfirmation(input);
       } else {
         e.target.textContent = value;
       }
     }
+  };
+
+  const handleConfirmation = (value) => {
+    MLService.updatePredict(prediction.id, value).then(() => {
+      console.log("ok")
+      setValue(value)
+    }).catch(e => console.log(e))
   };
 
   return (
@@ -24,7 +32,7 @@ const TransmissionCard = (props) => {
           <p>Текущие показания счетчика</p>
           <div
             className="custom-input"
-            contentEditable={clicked ? "true" : "false"}
+            contentEditable="true"
             onInput={handleChange}
           >
             {value}
@@ -41,7 +49,10 @@ const TransmissionCard = (props) => {
           clicked ? "basic-button black-button" : "basic-button white-button"
         }
         type="submit"
-        onClick={() => setClick(!clicked)}
+        onClick={() => {
+          setClick(!clicked)
+          handleConfirmation(clicked ? value : prediction.recognition)
+        }}
       >
         {clicked ? "подтвердить показания" : "отменить подтверждение показаний"}
       </button>
