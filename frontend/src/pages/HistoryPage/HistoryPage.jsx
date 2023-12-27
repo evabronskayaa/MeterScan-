@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from "react";
 import "./HistoryPage.scss";
 import MLService from "../../services/ML.service";
+import Plot from 'react-plotly.js';
 
 const HistoryPage = () => {
   const [predictions, setPredictions] = useState([])
 
   useEffect(() => {
-    MLService.getPredictions().then(setPredictions)
+    MLService.getPredictions().then(data => setPredictions(data.sort((a, b) => a.created_at - b.created_at)))
   }, [])
 
   return <div>
@@ -21,6 +22,16 @@ const HistoryPage = () => {
         })}
       </div>
     })}
+
+    <Plot
+        data={[
+          {
+            x: Array.from(predictions, prediction => new Date(prediction.created_at * 1000)),
+            y: Array.from(predictions, prediction => prediction.results ? Number(prediction.results[0]?.recognition) : 0),
+            type: 'scatter'
+          },
+        ]}
+    />
   </div>
 };
 
