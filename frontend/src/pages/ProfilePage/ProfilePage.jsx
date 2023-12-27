@@ -1,81 +1,81 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./ProfilePage.scss";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
-import TimePicker from "react-time-picker";
-import "react-time-picker/dist/TimePicker.css";
-import "react-clock/dist/Clock.css";
-import { useState } from "react";
+import axios from "axios";
+import authHeader from "../../services/auth-header";
+
+const API_URL = "http://localhost/api/v1/";
 
 const ProfilePage = () => {
-  const [time, setTime] = useState("10:00");
-  const [day, setDay] = useState([1]);
+  const [time, setTime] = useState(10);
+  const [day, setDay] = useState(1);
   const [sendNotifications, setSend] = useState(false);
 
-  const CheckRange = (value) =>{
-    console.log(typeof(value))
+  useEffect(() => {
+    axios.get(API_URL + "settings", {
+      headers: authHeader()
+    })
+        .then(r => r.data)
+        .then(data => {
+          setSend(data.notification_enabled)
+          if (data.notification_day_of_month !== 0) {
+            setDay(data.notification_day_of_month)
+          }
+          if (data.notification_hour !== 0) {
+            setTime(data.notification_hour)
+          }
+        })
+  }, [])
+
+  const checkRangeDayOfMonth = (value) =>{
     if (value === "") return
     if (value<1 || value>28) window.alert("День отправки сообщений должен быть в пределах от 1 до 28, потому что месяцы разной длины");
     else setDay(value);
   }
 
-  return (
-    <div class="profile-container">
-      <div className="title">Личный кабинет</div>
-      <div className="profile-value-row-with-button">
-        <div className="profile-value-row">
-          <div className="profile-value-row-container">л/с 4709040404</div>
-          <div className="profile-value-row-container">23-12-2023</div>
-          <div className="profile-value-row-container">горячая вода</div>
-          <div className="profile-value-row-container">26 куб</div>
-        </div>
-        <div className="row-container delete border round">
-          <img src="./img/delete.svg" alt="удалить" />
-          <span>Удалить показание</span>
-        </div>
-      </div>
+  const checkRangeHour = (value) =>{
+    if (value === "") return
+    if (value<0 || value>23) window.alert("Время отправки сообщений должно быть в пределах от 0 до 23");
+    else setTime(value);
+  }
 
-      <div className="profile-value-row-with-button">
-        <div className="profile-value-row">
-          <div className="profile-value-row-container">л/с 4709040404</div>
-          <div className="profile-value-row-container">23-12-2023</div>
-          <div className="profile-value-row-container">горячая вода</div>
-          <div className="profile-value-row-container">26 куб</div>
-        </div>
-        <div className="row-container delete border round">
-          <img src="./img/delete.svg" alt="удалить" />
-          <span>Удалить показание</span>
-        </div>
-      </div>
+  const updateSettings = () => {
+    const form = new FormData()
+    form.append("enabled", sendNotifications)
+    form.append("day", day)
+    form.append("hour", time)
 
-      <div className="row-container delete border round">
-        <img src="./img/icon-plus.png" alt="добавить" width={20} />
-        <span>Добавить новый лицевой счет</span>
-      </div>
+    axios.put(API_URL + "settings/notification", form, {
+      headers: authHeader()
+    })
+  }
 
-      <div className="profile-container border wide">
-        <p>Напоминания о передаче показаний</p>
-        <div className="profile-value-row">
-          <Toggle
+  return <div class="profile-container">
+    <div className="title">Личный кабинет</div>
+    <div className="profile-container border wide">
+      <p>Напоминания о передаче показаний</p>
+      <div className="profile-value-row">
+        <Toggle
+            checked={sendNotifications}
             backgroundColor="black"
             onChange={() => setSend(!sendNotifications)}
-          />
-          <span>Отправлять напоминания на почту</span>
-        </div>
-        <div className="profile-value-row">
-          <TimePicker onChange={setTime} value={time} />
-          <span>время отправки напоминания</span>
-        </div>
-
-        <div className="profile-value-row">
-          <input type="number" max="28" min="1" onChange={(event) => CheckRange(event.target.value)} value={day} />
-          <span>Дата отправки напоминания (от 1 до 28 числа)</span>
-        </div>
-
-        <button className="basic-button black-button">обновить настройки напоминаний</button>
+        />
+        <span>Отправлять напоминания на почту</span>
       </div>
+      <div className="profile-value-row">
+        <input type="number" max="23" min="0" onChange={e => checkRangeHour(e.target.value)} value={time}/>
+        <span>время отправки напоминания (от 0 до 23)</span>
+      </div>
+
+      <div className="profile-value-row">
+        <input type="number" max="28" min="1" onChange={e => checkRangeDayOfMonth(e.target.value)} value={day}/>
+        <span>Дата отправки напоминания (от 1 до 28 числа)</span>
+      </div>
+
+      <button className="basic-button black-button" onClick={updateSettings}>обновить настройки напоминаний</button>
     </div>
-  );
+  </div>;
 };
 
 export default ProfilePage;

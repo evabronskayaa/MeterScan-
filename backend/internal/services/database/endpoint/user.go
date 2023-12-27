@@ -103,6 +103,7 @@ func (s GRPCServer) GetEmailsForNotification(_ context.Context, request *proto.G
 		Preload("Settings").
 		Joins("inner join user_settings on user_settings.user_id = users.id").
 		Where("users.verified_at IS NOT NULL").
+		Where("user_settings.notification_enabled = 1").
 		Where("user_settings.notification_day_of_month = ?", dayOfMonth).
 		Where("user_settings.notification_hour = ?", hour).
 		Find(&users).Error; err != nil {
@@ -121,28 +122,51 @@ func (s GRPCServer) GetEmailsForNotification(_ context.Context, request *proto.G
 }
 
 func (s GRPCServer) GetSettings(_ context.Context, request *proto.UserRequest) (*proto.Settings, error) {
-	if user, err := getUserByRequest(s.DB, request); err != nil {
-		return nil, err
-	} else {
-		return user.Settings.Proto(), nil
+	var user schema.User
+
+	result := s.DB.Preload("Settings").First(&user, request.Id)
+	if result.Error != nil {
+		if errors2.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.ErrNotFoundUser
+		}
+		return nil, result.Error
 	}
+
+	return user.Settings.Proto(), nil
 }
 
 func (s GRPCServer) UpdateSettings(_ context.Context, request *proto.UpdateSettingsRequest) (*proto.Empty, error) {
-	if user, err := getUser(s.DB, "id = ?", request.Id); err != nil {
-		return nil, err
-	} else {
-		update := s.DB.Model(&user.Settings)
-		settings := request.Settings
-		if settings.NotificationDayOfMonth != nil {
-			update = update.Update("notification_day_of_month", settings.NotificationDayOfMonth)
+	var user schema.User
+
+	result := s.DB.Preload("Settings").First(&user, request.Id)
+	if result.Error != nil {
+		if errors2.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.ErrNotFoundUser
 		}
-		if settings.NotificationHour != nil {
-			update = update.Update("notification_hour", settings.NotificationHour)
-		}
-		if err := update.Error; err != nil {
+		return nil, result.Error
+	}
+
+	if user.Settings == (schema.UserSetting{}) {
+		user.Settings = schema.UserSetting{UserID: user.ID}
+		if err := s.DB.Create(&user.Settings).Error; err != nil {
 			return nil, err
 		}
 	}
+
+	settings := request.Settings
+	if settings.NotificationDayOfMonth != nil {
+		user.Settings.Notification.DayOfMonth = *settings.NotificationDayOfMonth
+	}
+	if settings.NotificationHour != nil {
+		user.Settings.Notification.Hour = *settings.NotificationHour
+	}
+	if settings.NotificationEnabled != nil {
+		user.Settings.Notification.Enabled = *settings.NotificationEnabled
+	}
+
+	if err := s.DB.Save(&user.Settings).Error; err != nil {
+		return nil, err
+	}
+
 	return &proto.Empty{}, nil
 }

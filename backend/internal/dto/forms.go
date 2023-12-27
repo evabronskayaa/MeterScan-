@@ -82,8 +82,9 @@ type UpdatePredictionForm struct {
 }
 
 type SetNotificationTimeForm struct {
-	Day  uint32 `json:"day" form:"id" binding:"required"`
-	Hour uint32 `json:"hour" form:"meter_readings" binding:"required"`
+	Enabled bool   `json:"enabled" form:"enabled"`
+	Day     uint32 `json:"day" form:"day" binding:"required"`
+	Hour    uint32 `json:"hour" form:"hour" binding:"required"`
 }
 
 func (f SetNotificationTimeForm) Validate(args ValidateArgs) error {

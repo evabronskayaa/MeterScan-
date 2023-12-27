@@ -24,7 +24,7 @@ const (
 
 const (
 	SigningAlgorithm = "HS256"
-	timeout          = time.Hour
+	timeout          = time.Hour * 1000
 	authHeader       = "Authorization"
 	tokenHeadName    = "Bearer"
 )

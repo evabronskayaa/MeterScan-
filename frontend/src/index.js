@@ -15,7 +15,7 @@ import Root from "./common/Root";
 
 const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
     <Route path="/register" Component={RegisterPage}/>
-    <Route path="/login" Component={ProfilePage}/>
+    <Route path="/login" Component={LoginPage}/>
 
     <Route path="/" Component={MainLayout}>
         <Route path="/" Component={MenuPage}/>

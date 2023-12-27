@@ -24,6 +24,7 @@ message UpdateSettingsRequest {
 message Settings {
   optional uint32 notification_day_of_month = 1;
   optional uint32 notification_hour = 2;
+  optional bool notification_enabled = 3;
 }
 
 message GetEmailsForNotificationRequest {

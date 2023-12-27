@@ -32,7 +32,6 @@ type Scope struct {
 
 func (i *PredictionInfo) Proto() *proto.RecognitionResult {
 	id := i.ID
-	println(id)
 	return &proto.RecognitionResult{
 		Id:          &id,
 		Metric:      i.Metric,

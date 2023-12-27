@@ -265,7 +265,7 @@ func (s *Service) GetSettingsHandler(c *gin.Context) {
 
 func (s *Service) SetNotificationHandler(c *gin.Context) {
 	var form dto.SetNotificationTimeForm
-	if err := c.ShouldBindQuery(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err)
 		return
 	} else if err := form.Validate(dto.ValidateArgs{Ctx: c}); err != nil {
@@ -278,6 +278,7 @@ func (s *Service) SetNotificationHandler(c *gin.Context) {
 	_, err := s.DatabaseService.UpdateSettings(c, &proto.UpdateSettingsRequest{
 		Id: user.Id,
 		Settings: &proto.Settings{
+			NotificationEnabled:    &form.Enabled,
 			NotificationHour:       &form.Hour,
 			NotificationDayOfMonth: &form.Day,
 		},

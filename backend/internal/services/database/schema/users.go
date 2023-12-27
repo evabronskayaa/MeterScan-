@@ -29,6 +29,7 @@ type UserSetting struct {
 }
 
 type NotificationSetting struct {
+	Enabled    bool   `json:"enabled"`
 	DayOfMonth uint32 `gorm:"type:int;not null" json:"day_of_month"`
 	Hour       uint32 `gorm:"type:int;not null" json:"hour"`
 }
@@ -44,6 +45,7 @@ func (u *User) Proto() *proto.UserResponse {
 
 func (s *UserSetting) Proto() *proto.Settings {
 	return &proto.Settings{
+		NotificationEnabled:    &s.Notification.Enabled,
 		NotificationDayOfMonth: &s.Notification.DayOfMonth,
 		NotificationHour:       &s.Notification.Hour,
 	}
