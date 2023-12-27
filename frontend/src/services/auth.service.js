@@ -14,7 +14,7 @@ class AuthService {
       .then(response => {
         console.log(JSON.stringify(response.data))
         if (response.data.token) {
-          localStorage.setItem("user", JSON.stringify(response.data));
+          localStorage.setItem("token", JSON.stringify(response.data.token));
           console.log(JSON.stringify(response.data))
         }
 
@@ -23,7 +23,7 @@ class AuthService {
   }
 
   logout() {
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   }
 
   register(email, password, recaptcha) {
@@ -35,23 +35,15 @@ class AuthService {
   }
 
   me() {
-    if (authService.getCurrentUser()) {
-      axios.get(API_URL + "me", {
+    if (localStorage.getItem("token")) {
+      return axios.get(API_URL + "me", {
         headers: authHeader(),
       }).then(response => {
         return response.data;
-      }).then(data => {
-        const localStorageItem = JSON.parse(localStorage.getItem("user"))
-        localStorageItem.user = data
-        localStorage.setItem("user", JSON.stringify(localStorageItem));
-      }).catch(() => {
-        authService.logout()
       })
+    } else {
+      return null
     }
-  }
-
-  getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'))?.user;
   }
 }
 

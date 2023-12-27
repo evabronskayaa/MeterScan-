@@ -7,7 +7,6 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import TransmissionCard from "../../components/TransmissionCard/transmissionCard";
 import "./RecognizePage.scss";
-import authService from "../../services/auth.service";
 import MLService from "../../services/ML.service";
 
 const RecognizePage = () => {
@@ -15,7 +14,6 @@ const RecognizePage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState();
-  const user = authService.getCurrentUser();
 
   const handleConfirmation = (index, newValue) => {
     const updatedValue = [...value];

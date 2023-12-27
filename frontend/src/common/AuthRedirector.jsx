@@ -1,11 +1,11 @@
-import authService from "../services/auth.service";
 import {Navigate, useLocation} from "react-router-dom";
 import React from "react";
+import useUser from "./useUser";
 
 const pagesWithNoAuth = ['/login', '/register']
 
 export const AuthRedirector = ({children}) => {
-    const user = authService.getCurrentUser()
+    const {user} = useUser()
     const location = useLocation()
     const path = location.pathname
 

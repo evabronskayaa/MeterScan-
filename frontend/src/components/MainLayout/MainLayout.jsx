@@ -2,13 +2,21 @@ import React from "react";
 import {NavLink, Outlet} from "react-router-dom";
 import authService from "../../services/auth.service";
 import "./MainLayout.scss";
+import useUser from "../../common/useUser";
 
 const MainLayout = () => {
-    const user = authService.getCurrentUser();
+    const {user, setUser} = useUser();
+
     const handleLogout = (e) => {
-        authService.logout();
-        window.location.reload();
+        authService.logout()
+        setUser(null)
     };
+
+    const update = () => {
+        authService.me()
+            .then(setUser)
+            .catch(handleLogout)
+    }
 
     return <div>
         <div className="header">
@@ -25,7 +33,10 @@ const MainLayout = () => {
         </div>
         <div>
             { !user.verified &&
-                <p>Подтверди аккаунт...</p>
+                <div>
+                    <p>Подтверди аккаунт...</p>
+                    <button onClick={update}>Обновить</button>
+                </div>
             }
             <Outlet/>
         </div>
