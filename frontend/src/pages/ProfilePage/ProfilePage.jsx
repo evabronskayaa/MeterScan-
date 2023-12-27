@@ -53,7 +53,7 @@ const ProfilePage = () => {
         <span>Добавить новый лицевой счет</span>
       </div>
 
-      <div className="profile-container border">
+      <div className="profile-container border wide">
         <p>Напоминания о передаче показаний</p>
         <div className="profile-value-row">
           <Toggle
