@@ -6,18 +6,21 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import {
     createBrowserRouter,
     createRoutesFromElements,
-    Navigate, Outlet,
+    Navigate,
+    Outlet,
     Route,
-    RouterProvider, ScrollRestoration,
+    RouterProvider,
+    ScrollRestoration,
     useLocation
 } from "react-router-dom";
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
-import MainPage from "./pages/MainPage/MainPage";
 import MenuPage from "./pages/MenuPage/MenuPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import authService from "./services/auth.service";
 import "./App.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
+import MainLayout from "./components/MainLayout/MainLayout";
+import RecognizePage from "./pages/RecognizePage/RecognizePage";
 
 export const RemoveTrailingSlash = ({ ...rest }) => {
     const location = useLocation()
@@ -42,9 +45,9 @@ const AuthRedirector = ({children}) => {
         if (!pagesWithNoAuth.includes(path)) {
             return <Navigate to='/login' state={{from: location}} replace/>
         }
-    } else if (pagesWithNoAuth.includes(path)) {
+    } else if (pagesWithNoAuth.includes(path) || (!user.verified && path !== '/')) {
         if (location.state?.from)
-            return <Navigate to={ location.state.from } replace/>
+            return <Navigate to={location.state.from} replace/>
         return <Navigate to="/" replace/>
     }
 
@@ -64,10 +67,13 @@ const Root = () => {
 const router = createBrowserRouter(createRoutesFromElements(<Route path="/" Component={Root}>
     <Route path="/register" Component={RegisterPage}/>
     <Route path="/login" Component={LoginPage}/>
-    <Route path="/recognize" Component={MainPage}/>
-    <Route path="/history" Component={HistoryPage}/>
-    <Route path="/profile" Component={ProfilePage}/>
-    <Route path="/" Component={MenuPage}/>
+
+    <Route path="/" Component={MainLayout}>
+        <Route path="/" Component={MenuPage}/>
+        <Route path="/profile" Component={ProfilePage}/>
+        <Route path="/recognize" Component={RecognizePage}/>
+        <Route path="/history" Component={HistoryPage}/>
+    </Route>
 </Route>))
 
 ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode>

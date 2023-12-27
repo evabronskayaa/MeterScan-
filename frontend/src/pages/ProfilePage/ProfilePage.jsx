@@ -1,22 +1,8 @@
 import React from "react";
 import "./ProfilePage.scss";
-import { NavLink } from "react-router-dom";
 
-const ProfilePage = ({ selectedImage, onUpload }) => {
-  return (
-    <>
-      <header style={{ display: "flex" }}>
-        <NavLink to="/">
-          <div className="logo">MeterScan+</div>
-        </NavLink>
-        <div className="header-right-container">
-          <div className="address">Курчатова 30, 78</div>
-          <NavLink to="/profile">
-            <button className="profile">Профиль</button>
-          </NavLink>
-        </div>
-      </header>
-      <main class="profile-container">
+const ProfilePage = () => {
+  return <div class="profile-container">
         <div className="title">Личный кабинет</div>
         <div className="profile-value-row-with-button">
           <div className="profile-value-row">
@@ -48,9 +34,7 @@ const ProfilePage = ({ selectedImage, onUpload }) => {
           <img src="./img/icon-plus.png" alt="добавить" width={20} />
           <span>Добавить новый лицевой счет</span>
         </div>
-      </main>
-    </>
-  );
+  </div>
 };
 
 export default ProfilePage;

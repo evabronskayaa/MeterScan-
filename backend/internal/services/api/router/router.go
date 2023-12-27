@@ -31,7 +31,7 @@ func ConfigureRouter(s *service.Service, port int) *http.Server {
 
 	router.RedirectTrailingSlash = true
 	router.Use(cors.New(cors.Config{
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,

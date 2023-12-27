@@ -1,0 +1,52 @@
+.header {
+  background-color: #ffffff;
+  height: 80px;
+  width: 100%;
+  top: 0;
+  right: 0;
+  left: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+}
+
+.header-right-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 20px;
+}
+
+.profile {
+  background-color: #ffffff;
+  border-color: #3c3737;
+  color: #3c3737;
+  border-width: 1px;
+  padding: 7px 15px;
+  border-radius: 0.25rem;
+}
+
+.address, .profile, .logout{
+  font-size: 17px;
+}
+
+.header div, .card-item{
+  color: black;
+  text-decoration: none;
+}
+
+.logout {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+  border-width: 1px;
+  padding: 7px 15px;
+  border-radius: 0.25rem;
+}

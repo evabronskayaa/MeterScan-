@@ -34,7 +34,7 @@ class AuthService {
   }
 
   getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'))?.user?.email;
+    return JSON.parse(localStorage.getItem('user'))?.user;
   }
 }
 

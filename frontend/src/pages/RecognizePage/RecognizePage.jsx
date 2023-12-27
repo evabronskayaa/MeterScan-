@@ -6,21 +6,16 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import TransmissionCard from "../../components/TransmissionCard/transmissionCard";
-import "./MainPage.scss";
+import "./RecognizePage.scss";
 import authService from "../../services/auth.service";
 import MLService from "../../services/ML.service";
 
-const MainPage = () => {
+const RecognizePage = () => {
   const [stage, changeStage] = useState(stages.upload);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState();
   const user = authService.getCurrentUser();
-
-  const handleLogout = (e) => {
-    authService.logout();
-    window.location.reload();
-  };
 
   const handleConfirmation = (index, newValue) => {
     const updatedValue = [...value];
@@ -89,17 +84,6 @@ const MainPage = () => {
   if (stage === stages.upload)
     return (
       <>
-        <NavLink to="/">
-          <p className="title main-title">MeterScan+</p>
-        </NavLink>
-        <div className="user">
-          <NavLink to="/profile">
-            <span>{user}</span>
-          </NavLink>
-          <button className="logout" onClick={handleLogout}>
-            Выйти
-          </button>
-        </div>
         <div className="form">
           <div className="row">
             <p className="title">Загрузка фото</p>
@@ -135,17 +119,6 @@ const MainPage = () => {
   else if (stage === stages.analyze)
     return (
       <>
-        <NavLink to="/">
-          <p className="title main-title">MeterScan+</p>
-        </NavLink>
-        <div className="user">
-          <NavLink to="/profile">
-            <span>{user}</span>
-          </NavLink>
-          <button className="logout" onClick={handleLogout}>
-            Выйти
-          </button>
-        </div>
         <div className="form">
           <p className="title">анализ счетчиков</p>
           <img
@@ -179,17 +152,6 @@ const MainPage = () => {
   else if (stage === stages.send)
     return (
       <>
-        <NavLink to="/">
-          <p className="title main-title">MeterScan+</p>
-        </NavLink>
-        <div className="user">
-          <NavLink to="/profile">
-            <span>{user}</span>
-          </NavLink>
-          <button className="logout" onClick={handleLogout}>
-            Выйти
-          </button>
-        </div>
         <div className="form">
           <p className="title">передача показаний</p>
           <img
@@ -227,17 +189,6 @@ const MainPage = () => {
   else if (stage === stages.sent)
     return (
       <>
-        <NavLink to="/">
-          <p className="title main-title">MeterScan+</p>
-        </NavLink>
-        <div className="user">
-          <NavLink to="/profile">
-            <span>{user}</span>
-          </NavLink>
-          <button className="logout" onClick={handleLogout}>
-            Выйти
-          </button>
-        </div>
         <p>Показания переданы!</p>
         <NavLink to="/">Вернуться на главную</NavLink>
       </>
@@ -245,4 +196,4 @@ const MainPage = () => {
   else return <p>Что-то не так...</p>;
 };
 
-export default MainPage;
+export default RecognizePage;
